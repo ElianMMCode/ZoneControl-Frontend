@@ -7,6 +7,7 @@ export interface ContactResponse {
 }
 
 export interface OfficeResponse {
+  id: string;
   name: string;
   address: string;
   openingHours: string;
@@ -15,6 +16,7 @@ export interface OfficeResponse {
 }
 
 export interface CatalogResponse {
+  id: string;
   name: string;
   description: string;
   activeIngredient: string;
