@@ -12,8 +12,12 @@ type Item = {
 const items: Item[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: "dashboard", roles: ["ADMIN"] },
   { to: "/admin/usuarios", label: "Usuarios", icon: "group", roles: ["ADMIN"] },
+  { to: "/admin/areas", label: "Áreas", icon: "domain", roles: ["ADMIN"] },
   { to: "/admin/contenido-publico", label: "Contenido Público", icon: "public", roles: ["ADMIN"] },
   { to: "/personal", label: "Gestión Personal", icon: "badge", roles: ["GESTOR_PERSONAL"] },
+  { to: "/personal/nuevo", label: "Registrar Personal", icon: "person_add", roles: ["GESTOR_PERSONAL"] },
+  { to: "/personal/carga-masiva", label: "Carga Masiva", icon: "upload_file", roles: ["GESTOR_PERSONAL"] },
+  { to: "/permisos", label: "Permisos", icon: "vpn_key", roles: ["GESTOR_PERSONAL"] },
   { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"] },
 ];
 

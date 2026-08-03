@@ -23,3 +23,12 @@ export type AccessResult = "AUTHORIZED" | "DENIED" | "UNREGISTERED" | "SUSPENDED
 export type DocumentType = "CC" | "CE" | "TI" | "PA" | "RC";
 export type ReportFormat = "CSV" | "EXCEL";
 export type ContentSection = "INSTITUTIONAL" | "CONTACT" | "LOCATIONS";
+
+export type ContractType =
+  | "TIEMPO_COMPLETO"
+  | "MEDIO_TIEMPO"
+  | "TEMPORAL"
+  | "CONTRATISTA"
+  | "PRACTICANTE";
+
+export type WorkShift = "DIURNO" | "NOCTURNO" | "MIXTO";

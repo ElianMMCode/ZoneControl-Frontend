@@ -10,7 +10,12 @@ import { AdminDashboard } from "@/views/admin/DashboardView";
 import { UsersView } from "@/views/admin/UsersView";
 import { CreateUserView } from "@/views/admin/CreateUserView";
 import { PublicContentView } from "@/views/admin/PublicContentView";
+import { AdminAreasView } from "@/views/admin/AdminAreasView";
 import { EmployeeListView } from "@/views/personal/EmployeeListView";
+import { RegisterEmployeeView } from "@/views/personal/RegisterEmployeeView";
+import { BulkUploadView } from "@/views/personal/BulkUploadView";
+import { EmployeeDetailView } from "@/views/personal/EmployeeDetailView";
+import { PermissionsView } from "@/views/personal/PermissionsView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
 import { NotFoundView } from "@/views/NotFoundView";
 import type { Role } from "@/types";
@@ -85,6 +90,51 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
             <EmployeeListView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/personal/nuevo",
+        handle: { title: "Registrar Personal" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <RegisterEmployeeView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/personal/carga-masiva",
+        handle: { title: "Carga Masiva" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <BulkUploadView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/personal/:id",
+        handle: { title: "Detalle de Empleado" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <EmployeeDetailView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/permisos",
+        handle: { title: "Gestión de Permisos" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <PermissionsView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/admin/areas",
+        handle: { title: "Áreas de Producción" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
+            <AdminAreasView />
           </RequireRole>
         ),
       },

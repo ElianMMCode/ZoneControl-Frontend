@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/common/PageHeader";
 import { DataTable, type Column } from "@/components/common/DataTable";
 import { StatusPill } from "@/components/common/StatusPill";
+import { StatCard } from "@/components/common/StatCard";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
 import { Select, Option } from "@/components/ui/Select";
@@ -14,6 +16,7 @@ import { isApiError } from "@/lib/api";
 import type { DocumentType, EmployeeSearchResponse, EmployeeStatus, Page } from "@/types";
 
 export function EmployeeListView() {
+  const navigate = useNavigate();
   const [documentType, setDocumentType] = useState<DocumentType | "">("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -22,20 +25,32 @@ export function EmployeeListView() {
   const [status, setStatus] = useState<EmployeeStatus | "">("");
   const [page, setPage] = useState(0);
 
-  const applied = {
-    documentType: documentType || undefined,
-    documentNumber: documentNumber || undefined,
-    firstName: firstName || undefined,
-    lastName: lastName || undefined,
-    departmentName: departmentName || undefined,
-    status: status || undefined,
-    page,
-    size: 10,
-  };
+  const data = useResource<Page<EmployeeSearchResponse>>(
+    "/api/personal",
+    employeeListQuery({
+      documentType: documentType || undefined,
+      documentNumber: documentNumber || undefined,
+      firstName: firstName || undefined,
+      lastName: lastName || undefined,
+      departmentName: departmentName || undefined,
+      status: status || undefined,
+      page,
+      size: 10,
+    }),
+    [documentType, documentNumber, firstName, lastName, departmentName, status, page],
+  );
 
-  const data = useResource<Page<EmployeeSearchResponse>>("/api/personal", employeeListQuery(applied), [
-    documentType, documentNumber, firstName, lastName, departmentName, status, page,
-  ]);
+  // KPIs derivados de la respuesta actual (de la página actual).
+  const counts = data.data?.content.reduce(
+    (acc, e) => {
+      acc.total++;
+      if (e.status === "ACTIVO") acc.activos++;
+      else if (e.status === "INACTIVO") acc.inactivos++;
+      else if (e.status === "SUSPENDIDO") acc.suspendidos++;
+      return acc;
+    },
+    { total: 0, activos: 0, inactivos: 0, suspendidos: 0 },
+  ) ?? { total: 0, activos: 0, inactivos: 0, suspendidos: 0 };
 
   const columns: Column<EmployeeSearchResponse>[] = [
     { key: "code", header: "Código", render: (e) => <code className="font-mono text-body-sm">{e.employeeCode}</code> },
@@ -44,20 +59,67 @@ export function EmployeeListView() {
     { key: "position", header: "Cargo", render: (e) => e.position },
     { key: "dept", header: "Departamento", render: (e) => e.departmentName },
     { key: "status", header: "Estado", render: (e) => <StatusPill status={e.status} /> },
-    { key: "actions", header: "", align: "right", render: () => (
-      <Button variant="ghost" size="sm" aria-label="Ver detalle"><Icon name="chevron_right" size="sm" /></Button>
-    ) },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      render: (e) => (
+        <Link
+          to={`/personal/${e.id}`}
+          aria-label="Ver detalle"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-on-surface-variant hover:bg-surface-container"
+        >
+          <Icon name="chevron_right" size="sm" />
+        </Link>
+      ),
+    },
   ];
-
-  const onSearch = () => setPage(0);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Gestión de Personal"
         subtitle="Directorio de empleados del laboratorio"
-        actions={<Button variant="secondary"><Icon name="upload_file" size="sm" /> Carga masiva</Button>}
+        actions={
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => navigate("/personal/carga-masiva")}>
+              <Icon name="upload_file" size="sm" /> Carga masiva
+            </Button>
+            <Button onClick={() => navigate("/personal/nuevo")}>
+              <Icon name="person_add" size="sm" /> Registrar
+            </Button>
+          </div>
+        }
       />
+
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatCard
+          icon="group"
+          label="Empleados (página)"
+          value={counts.total}
+          tone="primary"
+        />
+        <StatCard
+          icon="verified"
+          label="Activos"
+          value={counts.activos}
+          tone="secondary"
+          progress={{
+            percent: counts.total ? (counts.activos / counts.total) * 100 : 0,
+            tone: "secondary",
+          }}
+        />
+        <StatCard
+          icon="block"
+          label="Suspendidos / Inactivos"
+          value={counts.suspendidos + counts.inactivos}
+          tone="error"
+          progress={{
+            percent: counts.total ? ((counts.suspendidos + counts.inactivos) / counts.total) * 100 : 0,
+            tone: "error",
+          }}
+        />
+      </section>
 
       <section className="card space-y-4">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -93,7 +155,9 @@ export function EmployeeListView() {
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button onClick={onSearch}><Icon name="search" size="sm" /> Buscar</Button>
+          <Button onClick={() => setPage(0)}>
+            <Icon name="search" size="sm" /> Buscar
+          </Button>
         </div>
       </section>
 
