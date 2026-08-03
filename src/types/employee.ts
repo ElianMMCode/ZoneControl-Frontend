@@ -1,4 +1,4 @@
-import type { DocumentType, EmployeeStatus } from "./common";
+import type { DocumentType, EmployeeStatus, Role } from "./common";
 
 export interface EmployeeResponse {
   id: string;
@@ -11,6 +11,7 @@ export interface EmployeeResponse {
   documentNumber: string;
   departmentName: string;
   status: EmployeeStatus;
+  systemRole: Role | null;
 }
 
 export interface EmployeeSearchResponse extends EmployeeResponse {}

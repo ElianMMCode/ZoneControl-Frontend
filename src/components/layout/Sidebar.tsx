@@ -6,14 +6,14 @@ type Item = {
   to: string;
   label: string;
   icon: string;
-  roles: ReadonlyArray<Role | "ALL">;
+  roles: ReadonlyArray<Role>;
 };
 
 const items: Item[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: "dashboard", roles: ["ADMIN"] },
   { to: "/admin/usuarios", label: "Usuarios", icon: "group", roles: ["ADMIN"] },
-  { to: "/personal", label: "Gestión Personal", icon: "badge", roles: ["ADMIN", "GESTOR_PERSONAL"] },
-  { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR", "ADMIN"] },
+  { to: "/personal", label: "Gestión Personal", icon: "badge", roles: ["GESTOR_PERSONAL"] },
+  { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"] },
 ];
 
 export function Sidebar({ role }: { role: Role | null }) {

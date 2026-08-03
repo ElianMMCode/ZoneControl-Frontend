@@ -84,7 +84,7 @@ const router = createBrowserRouter([
         path: "/personal",
         handle: { title: "Gestión de Personal" } satisfies RouteHandle,
         element: (
-          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+          <RequireRole roles={["GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
             <EmployeeListView />
           </RequireRole>
         ),
@@ -93,7 +93,7 @@ const router = createBrowserRouter([
         path: "/supervisor",
         handle: { title: "Panel de Supervisión" } satisfies RouteHandle,
         element: (
-          <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
+          <RequireRole roles={["SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
             <SupervisorDashboard />
           </RequireRole>
         ),

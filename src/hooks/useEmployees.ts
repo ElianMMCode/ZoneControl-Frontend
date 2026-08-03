@@ -1,4 +1,4 @@
-import type { DocumentType, EmployeeSearchResponse, EmployeeStatus, Page } from "@/types";
+import type { DocumentType, EmployeeSearchResponse, EmployeeStatus, Page, Role } from "@/types";
 
 export type EmployeeListParams = {
   documentType?: DocumentType;
@@ -7,6 +7,7 @@ export type EmployeeListParams = {
   lastName?: string;
   departmentName?: string;
   status?: EmployeeStatus;
+  systemRole?: Role | null;
   page?: number;
   size?: number;
 };
@@ -19,6 +20,7 @@ export function employeeListQuery(p: EmployeeListParams) {
     lastName: p.lastName,
     departmentName: p.departmentName,
     status: p.status,
+    systemRole: p.systemRole,
     page: p.page,
     size: p.size ?? 10,
   };

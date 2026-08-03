@@ -1,6 +1,16 @@
 import { useCallback, useState } from "react";
 import { apiFetch, isApiError } from "@/lib/api";
-import type { ApiError, CreateUserRequest, Page, Role, StatusUpdateRequest, UpdateUserRequest, UserResponse, UserStatus } from "@/types";
+import type {
+  ApiError,
+  CreateUserRequest,
+  EmployeeSearchResponse,
+  Page,
+  Role,
+  StatusUpdateRequest,
+  UpdateUserRequest,
+  UserResponse,
+  UserStatus,
+} from "@/types";
 
 export function useUserMutations() {
   const [loading, setLoading] = useState(false);
@@ -70,6 +80,7 @@ export type UserListParams = {
   search?: string;
   role?: Role;
   status?: UserStatus;
+  pendientesConfiguracion?: boolean;
   page?: number;
   size?: number;
 };
@@ -79,9 +90,10 @@ export function userListQuery(p: UserListParams) {
     search: p.search,
     role: p.role,
     status: p.status,
+    pendientesConfiguracion: p.pendientesConfiguracion,
     page: p.page,
     size: p.size ?? 10,
   };
 }
 
-export type { Page, UserResponse };
+export type { Page, UserResponse, EmployeeSearchResponse };
