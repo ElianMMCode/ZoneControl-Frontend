@@ -9,6 +9,7 @@ import { LandingView } from "@/views/public/LandingView";
 import { AdminDashboard } from "@/views/admin/DashboardView";
 import { UsersView } from "@/views/admin/UsersView";
 import { CreateUserView } from "@/views/admin/CreateUserView";
+import { PublicContentView } from "@/views/admin/PublicContentView";
 import { EmployeeListView } from "@/views/personal/EmployeeListView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
 import { NotFoundView } from "@/views/NotFoundView";
@@ -66,6 +67,15 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
             <CreateUserView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/admin/contenido-publico",
+        handle: { title: "Contenido Público" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
+            <PublicContentView />
           </RequireRole>
         ),
       },

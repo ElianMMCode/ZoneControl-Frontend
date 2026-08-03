@@ -12,6 +12,7 @@ type Item = {
 const items: Item[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: "dashboard", roles: ["ADMIN"] },
   { to: "/admin/usuarios", label: "Usuarios", icon: "group", roles: ["ADMIN"] },
+  { to: "/admin/contenido-publico", label: "Contenido Público", icon: "public", roles: ["ADMIN"] },
   { to: "/personal", label: "Gestión Personal", icon: "badge", roles: ["GESTOR_PERSONAL"] },
   { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"] },
 ];
