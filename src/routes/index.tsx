@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, BrowserRouter, useMatches } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter, useMatches } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { AppShell } from "@/components/layout/AppShell";
@@ -13,18 +13,6 @@ import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
 import { NotFoundView } from "@/views/NotFoundView";
 import { useAuth } from "@/hooks/useAuth";
 import type { Role } from "@/types";
-
-function RoleHome() {
-  const { role, hydrated, isAuthed } = useAuth();
-  if (!hydrated) return null;
-  if (!isAuthed) return <Navigate to="/login" replace />;
-  const map: Record<Role, string> = {
-    ADMIN: "/admin/dashboard",
-    GESTOR_PERSONAL: "/personal",
-    SUPERVISOR_AUDITOR: "/supervisor",
-  };
-  return <Navigate to={role ? map[role] : "/login"} replace />;
-}
 
 type RouteHandle = { title?: string };
 
@@ -42,67 +30,85 @@ function ShellWithTitle() {
   );
 }
 
+function RoleHome() {
+  const { role, hydrated, isAuthed } = useAuth();
+  if (!hydrated) return null;
+  if (!isAuthed) return <Navigate to="/login" replace />;
+  const map: Record<Role, string> = {
+    ADMIN: "/admin/dashboard",
+    GESTOR_PERSONAL: "/personal",
+    SUPERVISOR_AUDITOR: "/supervisor",
+  };
+  return <Navigate to={role ? map[role] : "/login"} replace />;
+}
+
+const router = createBrowserRouter([
+  {
+    element: <AuthLayout />,
+    children: [
+      { path: "/login", element: <LoginView /> },
+      { path: "/configurar-contrasena", element: <SetupPasswordView /> },
+    ],
+  },
+  {
+    element: <ShellWithTitle />,
+    children: [
+      {
+        path: "/admin/dashboard",
+        handle: { title: "Panel de Administración" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
+            <AdminDashboard />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/admin/usuarios",
+        handle: { title: "Usuarios" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
+            <UsersView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/admin/usuarios/nuevo",
+        handle: { title: "Nuevo Usuario" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
+            <CreateUserView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/personal",
+        handle: { title: "Gestión de Personal" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <EmployeeListView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/supervisor",
+        handle: { title: "Panel de Supervisión" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
+            <SupervisorDashboard />
+          </RequireRole>
+        ),
+      },
+    ],
+  },
+  { path: "/", element: <RoleHome /> },
+  { path: "*", element: <NotFoundView /> },
+]);
+
 export function AppRoutes() {
   return (
-    <BrowserRouter>
+    <>
       <Toaster richColors position="top-right" closeButton />
-      <Routes>
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<LoginView />} />
-          <Route path="/configurar-contrasena" element={<SetupPasswordView />} />
-        </Route>
-
-        <Route element={<ShellWithTitle />}>
-          <Route
-            path="/admin/dashboard"
-            handle={{ title: "Panel de Administración" } as RouteHandle}
-            element={
-              <RequireRole roles={["ADMIN"]}>
-                <AdminDashboard />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/usuarios"
-            handle={{ title: "Usuarios" } as RouteHandle}
-            element={
-              <RequireRole roles={["ADMIN"]}>
-                <UsersView />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/usuarios/nuevo"
-            handle={{ title: "Nuevo Usuario" } as RouteHandle}
-            element={
-              <RequireRole roles={["ADMIN"]}>
-                <CreateUserView />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/personal"
-            handle={{ title: "Gestión de Personal" } as RouteHandle}
-            element={
-              <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"]}>
-                <EmployeeListView />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/supervisor"
-            handle={{ title: "Panel de Supervisión" } as RouteHandle}
-            element={
-              <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"]}>
-                <SupervisorDashboard />
-              </RequireRole>
-            }
-          />
-        </Route>
-
-        <Route path="/" element={<RoleHome />} />
-        <Route path="*" element={<NotFoundView />} />
-      </Routes>
-    </BrowserRouter>
+      <RouterProvider router={router} />
+    </>
   );
 }

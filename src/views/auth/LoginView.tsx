@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ export function LoginView() {
   const navigate = useNavigate();
 
   if (hydrated && isAuthed && role) {
-    return navigate(homeByRole[role], { replace: true }) as never;
+    return <Navigate to={homeByRole[role]} replace />;
   }
 
   const onSubmit = handleSubmit(async (values) => {
