@@ -1,17 +1,17 @@
-import { Navigate, RouterProvider, createBrowserRouter, useMatches } from "react-router-dom";
+import { RouterProvider, createBrowserRouter, useMatches } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { AppShell } from "@/components/layout/AppShell";
 import { RequireAuth, RequireRole } from "./guards";
 import { LoginView } from "@/views/auth/LoginView";
 import { SetupPasswordView } from "@/views/auth/SetupPasswordView";
+import { LandingView } from "@/views/public/LandingView";
 import { AdminDashboard } from "@/views/admin/DashboardView";
 import { UsersView } from "@/views/admin/UsersView";
 import { CreateUserView } from "@/views/admin/CreateUserView";
 import { EmployeeListView } from "@/views/personal/EmployeeListView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
 import { NotFoundView } from "@/views/NotFoundView";
-import { useAuth } from "@/hooks/useAuth";
 import type { Role } from "@/types";
 
 type RouteHandle = { title?: string };
@@ -30,19 +30,8 @@ function ShellWithTitle() {
   );
 }
 
-function RoleHome() {
-  const { role, hydrated, isAuthed } = useAuth();
-  if (!hydrated) return null;
-  if (!isAuthed) return <Navigate to="/login" replace />;
-  const map: Record<Role, string> = {
-    ADMIN: "/admin/dashboard",
-    GESTOR_PERSONAL: "/personal",
-    SUPERVISOR_AUDITOR: "/supervisor",
-  };
-  return <Navigate to={role ? map[role] : "/login"} replace />;
-}
-
 const router = createBrowserRouter([
+  { path: "/", element: <LandingView /> },
   {
     element: <AuthLayout />,
     children: [
@@ -100,7 +89,6 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: "/", element: <RoleHome /> },
   { path: "*", element: <NotFoundView /> },
 ]);
 

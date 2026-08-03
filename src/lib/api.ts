@@ -100,7 +100,7 @@ export async function apiFetch<T>(path: string, opts: ApiOptions = {}): Promise<
 
 export async function apiDownload(
   path: string,
-  opts: Omit<ApiOptions, "body"> & { body?: Json | BodyInit },
+  opts: (Omit<ApiOptions, "body"> & { body?: Json | BodyInit }) = {},
 ): Promise<{ blob: Blob; filename: string | null }> {
   const url = buildUrl(path, opts.query);
   const init: RequestInit = {
