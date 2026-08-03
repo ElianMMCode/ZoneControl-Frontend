@@ -1,0 +1,50 @@
+import { DataTable, type Column } from "@/components/common/DataTable";
+import { StatusPill } from "@/components/common/StatusPill";
+import { RolePill } from "@/components/common/RolePill";
+import { Button } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
+import type { UserResponse } from "@/types";
+
+export function UserTable({
+  data,
+  onEdit,
+  onToggleStatus,
+  onResetPassword,
+}: {
+  data: UserResponse[];
+  onEdit: (u: UserResponse) => void;
+  onToggleStatus: (u: UserResponse) => void;
+  onResetPassword: (u: UserResponse) => void;
+}) {
+  const columns: Column<UserResponse>[] = [
+    { key: "name", header: "Nombre", render: (u) => `${u.firstName} ${u.lastName}` },
+    { key: "email", header: "Email", render: (u) => u.email },
+    { key: "role", header: "Rol", render: (u) => <RolePill role={u.role} /> },
+    { key: "status", header: "Estado", render: (u) => <StatusPill status={u.status} /> },
+    { key: "code", header: "Código", render: (u) => <code className="font-mono text-body-sm">{u.employeeCode}</code> },
+    {
+      key: "actions",
+      header: "Acciones",
+      align: "right",
+      render: (u) => (
+        <div className="flex justify-end gap-1">
+          <Button variant="ghost" size="sm" onClick={() => onEdit(u)} aria-label={`Editar ${u.firstName} ${u.lastName}`}>
+            <Icon name="edit" size="sm" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onToggleStatus(u)}
+            aria-label={u.status === "ACTIVO" ? `Desactivar ${u.firstName}` : `Activar ${u.firstName}`}
+          >
+            <Icon name={u.status === "ACTIVO" ? "power_settings_new" : "check_circle"} size="sm" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onResetPassword(u)} aria-label={`Restablecer contraseña de ${u.firstName}`}>
+            <Icon name="key" size="sm" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+  return <DataTable columns={columns} data={data} rowKey={(u) => u.id} />;
+}
