@@ -23,6 +23,7 @@ export interface PermissionResponse {
   reactivationDate: string | null;
   startTime: string;
   endTime: string;
+  schedules: { dayOfWeek: WeekDay; startTime: string; endTime: string }[];
 }
 
 export interface CreatePermissionRequest {

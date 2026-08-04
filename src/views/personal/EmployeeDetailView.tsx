@@ -150,6 +150,7 @@ export function EmployeeDetailView() {
         expirationDate: values.expirationDate,
         startTime: values.startTime,
         endTime: values.endTime,
+        schedules: values.schedules,
       });
       toast.success("Permiso actualizado");
       permissions.refresh();
