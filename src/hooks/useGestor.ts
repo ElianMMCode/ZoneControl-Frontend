@@ -153,6 +153,7 @@ export function usePermissionMutations() {
     expirationDate: string;
     startTime: string;
     endTime: string;
+    schedules?: { dayOfWeek: string; startTime: string; endTime: string }[];
   }) => {
     return apiFetch<PermissionResponse>(PERMISSIONS_PATH, {
       method: "POST",
@@ -184,6 +185,7 @@ export function usePermissionMutations() {
     expirationDate?: string;
     startTime?: string;
     endTime?: string;
+    schedules?: { dayOfWeek: string; startTime: string; endTime: string }[];
   }) => {
     return apiFetch<PermissionResponse>(`${PERMISSIONS_PATH}/${id}`, {
       method: "PATCH",

@@ -14,6 +14,7 @@ import type {
   Page,
   PermissionResponse,
   ProductionArea,
+  WeekDay,
 } from "@/types";
 
 export interface PermissionFormValues {
@@ -23,7 +24,14 @@ export interface PermissionFormValues {
   expirationDate: string;
   startTime: string;
   endTime: string;
+  schedules: { dayOfWeek: WeekDay; startTime: string; endTime: string }[];
 }
+
+const ALL_DAYS: WeekDay[] = ["LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM"];
+
+const DAY_LABELS: Record<WeekDay, string> = {
+  LUN: "Lun", MAR: "Mar", MIE: "Mié", JUE: "Jue", VIE: "Vie", SAB: "Sáb", DOM: "Dom",
+};
 
 const schema = z
   .object({
@@ -88,8 +96,11 @@ export function PermissionFormModal({
     },
   });
 
+  const [selectedDays, setSelectedDays] = useState<WeekDay[]>(ALL_DAYS);
+
   useEffect(() => {
     if (!open) return;
+    setSelectedDays(ALL_DAYS);
     if (initial) {
       reset({
         employeeCode: initial.employeeCode,
@@ -111,6 +122,12 @@ export function PermissionFormModal({
     }
   }, [open, initial, fixedEmployeeCode, reset]);
 
+  const toggleDay = (day: WeekDay) => {
+    setSelectedDays((days) =>
+      days.includes(day) ? days.filter((d) => d !== day) : [...days, day],
+    );
+  };
+
   const selectedEmployeeCode = watch("employeeCode");
 
   return (
@@ -131,7 +148,15 @@ export function PermissionFormModal({
           </Button>
           <Button
             onClick={handleSubmit(async (values) => {
-              const ok = await onSubmit(values);
+              const payload: PermissionFormValues = {
+                ...values,
+                schedules: selectedDays.map((d) => ({
+                  dayOfWeek: d,
+                  startTime: values.startTime,
+                  endTime: values.endTime,
+                })),
+              };
+              const ok = await onSubmit(payload);
               if (ok) onClose();
             })}
             loading={loading}
@@ -173,6 +198,31 @@ export function PermissionFormModal({
           <FormField id="endTime" label="Hora fin" error={errors.endTime?.message} required>
             <input id="endTime" type="time" className="input" aria-invalid={!!errors.endTime} {...register("endTime")} />
           </FormField>
+        </div>
+
+        <div>
+          <span className="field-label">Días de la semana (turnos)</span>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {ALL_DAYS.map((d) => {
+              const active = selectedDays.includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => toggleDay(d)}
+                  aria-pressed={active}
+                  className={`rounded-full border px-3 py-1 text-body-sm transition-colors ${
+                    active
+                      ? "border-primary bg-primary-container/30 text-primary"
+                      : "border-outline-variant text-on-surface-variant hover:bg-surface-container"
+                  }`}
+                >
+                  {DAY_LABELS[d]}
+                </button>
+              );
+            })}
+          </div>
+          <p className="field-help">Si no marcas ninguno se aplica el turno todos los días (LUN–DOM).</p>
         </div>
 
         {errorMessage ? (

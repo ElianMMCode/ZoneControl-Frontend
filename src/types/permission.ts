@@ -1,9 +1,15 @@
-import type { PermissionStatus } from "./common";
+import type { PermissionStatus, WeekDay } from "./common";
 
 export interface ProductionArea {
   id: string;
   name: string;
   description: string | null;
+}
+
+export interface PermissionScheduleRequest {
+  dayOfWeek: WeekDay;
+  startTime: string;
+  endTime: string;
 }
 
 export interface PermissionResponse {
@@ -26,6 +32,7 @@ export interface CreatePermissionRequest {
   expirationDate: string;
   startTime: string;
   endTime: string;
+  schedules?: PermissionScheduleRequest[];
 }
 
 export interface UpdatePermissionRequest {
@@ -33,4 +40,5 @@ export interface UpdatePermissionRequest {
   expirationDate?: string;
   startTime?: string;
   endTime?: string;
+  schedules?: PermissionScheduleRequest[];
 }

@@ -32,3 +32,4 @@ export type ContractType =
   | "PRACTICANTE";
 
 export type WorkShift = "DIURNO" | "NOCTURNO" | "MIXTO";
+export type WeekDay = "LUN" | "MAR" | "MIE" | "JUE" | "VIE" | "SAB" | "DOM";
