@@ -59,34 +59,40 @@ export function Sidebar({ role }: { role: Role | null }) {
       )}
     >
       <div className="flex h-16 items-center gap-1 border-b border-outline-variant px-3">
-        <Link
-          to="/"
-          title="Volver al inicio"
-          className={cn(
-            "flex min-w-0 items-center gap-2 rounded-md",
-            collapsed ? "justify-center" : "flex-1 px-2",
-          )}
-        >
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-on-primary">
-            <Icon name="verified_user" size="md" />
-          </span>
-          {!collapsed ? (
-            <span className="min-w-0">
-              <span className="block truncate text-body-sm font-bold text-on-surface">Laboratorio XYZ</span>
-              <span className="label-caps">Sistema de acceso</span>
-            </span>
-          ) : null}
-        </Link>
-        {!collapsed ? (
+        {collapsed ? (
           <button
             type="button"
-            aria-label="Ocultar menú"
-            onClick={() => setCollapsed(true)}
-            className="rounded-md p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Mostrar menú"
+            onClick={() => setCollapsed(false)}
+            className="mx-auto rounded-md p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <Icon name="menu" size="sm" />
+            <Icon name="menu_open" size="sm" />
           </button>
-        ) : null}
+        ) : (
+          <>
+            <Link
+              to="/"
+              title="Volver al inicio"
+              className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2"
+            >
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-on-primary">
+                <Icon name="verified_user" size="md" />
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-body-sm font-bold text-on-surface">Laboratorio XYZ</span>
+                <span className="label-caps">Sistema de acceso</span>
+              </span>
+            </Link>
+            <button
+              type="button"
+              aria-label="Ocultar menú"
+              onClick={() => setCollapsed(true)}
+              className="rounded-md p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <Icon name="menu" size="sm" />
+            </button>
+          </>
+        )}
       </div>
 
       <div className={cn("border-b border-outline-variant py-4", collapsed ? "flex justify-center" : "px-4")}>
@@ -120,19 +126,6 @@ export function Sidebar({ role }: { role: Role | null }) {
           ),
         )}
       </nav>
-
-      {collapsed ? (
-        <div className="border-t border-outline-variant p-3">
-          <button
-            type="button"
-            aria-label="Mostrar menú"
-            onClick={() => setCollapsed(false)}
-            className="flex w-full justify-center rounded-md p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <Icon name="menu_open" size="sm" />
-          </button>
-        </div>
-      ) : null}
     </aside>
   );
 }
