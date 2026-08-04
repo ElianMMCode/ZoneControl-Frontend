@@ -11,6 +11,7 @@ export function useAuth() {
   const token = useAuthStore(selectToken);
   const login = useAuthStore((s) => s.login);
   const logout = useAuthStore((s) => s.logout);
+  const updateUsuario = useAuthStore((s) => s.updateUsuario);
   const hydrated = useAuthStore((s) => s.isHydrated);
 
   useEffect(() => {
@@ -19,5 +20,5 @@ export function useAuth() {
     setAuthTokenGetter(() => useAuthStore.getState().token);
   }, []);
 
-  return { isAuthed, role, user, token, login, logout, hydrated };
+  return { isAuthed, role, user, token, login, logout, updateUsuario, hydrated };
 }

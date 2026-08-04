@@ -21,6 +21,20 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface UpdateProfileResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: Role;
+}
+
 export interface SetupTokenValidationResponse {
   valid: boolean;
   userId: string;

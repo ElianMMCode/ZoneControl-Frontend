@@ -17,6 +17,7 @@ interface AuthState {
   login: (payload: LoginResponse) => void;
   logout: () => void;
   setHydrated: (v: boolean) => void;
+  updateUsuario: (nombre: string, email: string) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -34,6 +35,8 @@ export const useAuthStore = create<AuthState>()(
         }),
       logout: () => set({ token: null, usuario: null, requirePasswordChange: false }),
       setHydrated: (v) => set({ isHydrated: v }),
+      updateUsuario: (nombre, email) =>
+        set((state) => (state.usuario ? { usuario: { ...state.usuario, nombre, email } } : {})),
     }),
     {
       name: "zc.auth",
