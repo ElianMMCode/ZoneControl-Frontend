@@ -13,9 +13,6 @@ import { usePublicData } from "@/hooks/usePublicData";
 export function LandingView() {
   const data = usePublicData();
   const { info } = data.institutional ?? {};
-  const productionAreas = info?.productionAreas
-    ? info.productionAreas.split(", ").map((s) => s.trim()).filter(Boolean)
-    : [];
 
   return (
     <div className="min-h-screen scroll-smooth bg-public-surface text-public-on-surface">
@@ -33,7 +30,6 @@ export function LandingView() {
           <HeroSection
             companyName={info?.companyName ?? "Laboratorio XYZ"}
             description={info?.description}
-            productionAreas={productionAreas}
           />
           <AboutSection
             mission={info?.mission}

@@ -1,7 +1,17 @@
 import { Link } from "react-router-dom";
 import { Icon } from "@/components/ui/Icon";
+import { useAuth } from "@/hooks/useAuth";
+
+const panelByRole: Record<string, string> = {
+  ADMIN: "/admin/dashboard",
+  GESTOR_PERSONAL: "/personal",
+  SUPERVISOR_AUDITOR: "/supervisor",
+};
 
 export function PublicFooter() {
+  const { isAuthed, role, hydrated } = useAuth();
+  const internalHref =
+    hydrated && isAuthed && role ? panelByRole[role] : "/login";
   return (
     <footer className="border-t border-outline-variant/50 bg-public-surface">
       <div className="mx-auto grid max-w-[1280px] gap-8 px-6 py-10 md:grid-cols-3">
@@ -29,7 +39,7 @@ export function PublicFooter() {
         <div>
           <h3 className="label-caps text-public-on-surface">Legal</h3>
           <ul className="mt-3 space-y-1 text-body-sm">
-            <li><Link to="/login" className="text-public-on-surface-variant hover:text-public-primary">Acceso Interno</Link></li>
+            <li><Link to={internalHref} className="text-public-on-surface-variant hover:text-public-primary">Acceso Interno</Link></li>
             <li className="text-public-on-surface-variant">NIT 900.123.456-7</li>
             <li className="text-public-on-surface-variant">Vigilado por INVIMA</li>
           </ul>

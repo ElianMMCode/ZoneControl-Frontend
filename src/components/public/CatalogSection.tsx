@@ -1,5 +1,4 @@
 import type { CatalogResponse } from "@/types";
-import { Icon } from "@/components/ui/Icon";
 
 export function CatalogSection({ products }: { products: CatalogResponse[] }) {
   if (products.length === 0) {
@@ -35,14 +34,6 @@ export function CatalogSection({ products }: { products: CatalogResponse[] }) {
               key={p.id}
               className="flex flex-col gap-3 rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 rounded-full bg-public-primary-container/20 px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase text-public-primary">
-                  <Icon name="medication" size="sm" /> {p.productionArea || "—"}
-                </span>
-                <span className="font-mono text-[11px] text-on-surface-variant">
-                  ID {p.id.slice(0, 8)}
-                </span>
-              </div>
               <h3 className="text-heading-md text-public-on-surface">{p.name}</h3>
               {p.description ? (
                 <p className="text-body-sm text-public-on-surface-variant">{p.description}</p>

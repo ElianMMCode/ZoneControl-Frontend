@@ -3,11 +3,9 @@ import { Icon } from "@/components/ui/Icon";
 export function HeroSection({
   companyName,
   description,
-  productionAreas,
 }: {
   companyName: string;
   description?: string;
-  productionAreas?: string[];
 }) {
   return (
     <section
@@ -23,7 +21,9 @@ export function HeroSection({
             {companyName}
           </h1>
           {description ? (
-            <p className="mt-4 text-body-lg text-public-on-surface-variant">{description}</p>
+            <p className="mt-4 text-body-lg text-public-on-surface-variant">
+              {description}
+            </p>
           ) : null}
           <div className="mt-8 flex flex-wrap gap-3">
             <a
@@ -40,24 +40,28 @@ export function HeroSection({
             </a>
           </div>
         </div>
-        <aside className="rounded-lg border border-public-primary/30 bg-surface-container-lowest p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-body-sm font-semibold text-public-primary">
-            <Icon name="verified" size="sm" /> Calidad Certificada
+        <div className="relative">
+          <div className="overflow-hidden rounded-2xl border-4 border-white shadow-2xl">
+            <img
+              src="artix-home-process.jpg"
+              alt="Equipo de laboratorio farmacéutico de Laboratorio XYZ"
+              className="h-auto w-full object-cover"
+            />
           </div>
-          <p className="mt-2 text-body-sm text-public-on-surface-variant">
-            Estándares GMP y Buenas Prácticas de Manufactura en todas
-            nuestras líneas de producción.
-          </p>
-          {productionAreas && productionAreas.length > 0 ? (
-            <ul className="mt-4 space-y-1 text-body-sm text-public-on-surface">
-              {productionAreas.map((area) => (
-                <li key={area} className="flex items-center gap-2">
-                  <Icon name="check" size="sm" className="text-secondary" /> {area}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </aside>
+          <div className="absolute -bottom-6 -left-6 flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-6 shadow-xl">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-public-primary-container/30 text-public-primary">
+              <Icon name="verified" size="lg" />
+            </span>
+            <div>
+              <p className="text-heading-md font-semibold text-public-on-surface">
+                Calidad Certificada
+              </p>
+              <p className="text-body-sm text-public-on-surface-variant">
+                Estándares Internacionales GMP
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
