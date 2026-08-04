@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { DataTable, type Column } from "@/components/common/DataTable";
 import { StatusPill } from "@/components/common/StatusPill";
 import { StatCard } from "@/components/common/StatCard";
+import { QuickActions } from "@/components/common/QuickActions";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
 import { Select, Option } from "@/components/ui/Select";
@@ -120,6 +121,14 @@ export function EmployeeListView() {
           }}
         />
       </section>
+
+      <QuickActions
+        actions={[
+          { label: "Registrar personal", icon: "person_add", to: "/personal/nuevo" },
+          { label: "Carga masiva", icon: "upload_file", to: "/personal/carga-masiva" },
+          { label: "Gestión de permisos", icon: "vpn_key", to: "/permisos" },
+        ]}
+      />
 
       <section className="card space-y-4">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">

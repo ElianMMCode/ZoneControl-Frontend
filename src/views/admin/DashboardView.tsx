@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
+import { QuickActions } from "@/components/common/QuickActions";
 import { StatCardSkeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
@@ -109,6 +110,17 @@ export function AdminDashboard() {
           />
         </div>
       ) : null}
+
+      <QuickActions
+        actions={[
+          { label: "Crear usuario", icon: "person_add", to: "/admin/usuarios/nuevo", description: "Vincular un empleado como usuario del sistema" },
+          { label: "Gestión de usuarios", icon: "group", to: "/admin/usuarios" },
+          { label: "Contenido público", icon: "public", to: "/admin/contenido-publico" },
+          { label: "Áreas de producción", icon: "domain", to: "/admin/areas" },
+          { label: "Matriz de roles", icon: "verified_user", to: "/admin/matriz-roles" },
+          { label: "Exportar historial", icon: "summarize", to: "/supervisor/reportes" },
+        ]}
+      />
 
       <CandidateEmployeesPanel
         candidates={candidates.data?.content ?? []}

@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
+import { QuickActions } from "@/components/common/QuickActions";
 import { StatCardSkeleton, TableRowSkeleton } from "@/components/ui/Skeleton";
 import { DataTable, type Column } from "@/components/common/DataTable";
 import { StatusPill } from "@/components/common/StatusPill";
@@ -48,6 +49,14 @@ export function SupervisorDashboard() {
           <StatCard label="Permisos activos" value={formatNumber(stats.data.totalPermisosActivos)} icon="vpn_key" />
         </div>
       ) : null}
+
+      <QuickActions
+        actions={[
+          { label: "Validar credencial", icon: "verified_user", to: "/supervisor/validar" },
+          { label: "Zonas en vivo", icon: "location_on", to: "/supervisor/zones" },
+          { label: "Reportes / Historial", icon: "summarize", to: "/supervisor/reportes" },
+        ]}
+      />
 
       <section className="card">
         <header className="card-header">
