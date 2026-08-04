@@ -5,14 +5,13 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
 import { Select, SelectField, Option } from "@/components/ui/Select";
-import type { Role, UpdateUserRequest, UserResponse, UserStatus } from "@/types";
+import type { Role, UpdateUserRequest, UserResponse } from "@/types";
 
 const schema = z.object({
   firstName: z.string().min(2, "Mínimo 2 caracteres").max(35),
   lastName: z.string().min(2, "Mínimo 2 caracteres").max(35),
   email: z.string().email("Email inválido").max(100),
   role: z.enum(["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"]),
-  status: z.enum(["ACTIVO", "INACTIVO"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -36,7 +35,7 @@ export function UserFormModal({
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    defaultValues: { firstName: "", lastName: "", email: "", role: "GESTOR_PERSONAL" as Role, status: "ACTIVO" as UserStatus },
+    defaultValues: { firstName: "", lastName: "", email: "", role: "GESTOR_PERSONAL" as Role },
   });
 
   useEffect(() => {
@@ -46,7 +45,6 @@ export function UserFormModal({
         lastName: user.lastName,
         email: user.email,
         role: user.role,
-        status: user.status,
       });
     }
   }, [user, reset]);
@@ -90,12 +88,6 @@ export function UserFormModal({
               <Option value="ADMIN">Admin</Option>
               <Option value="GESTOR_PERSONAL">Gestor Personal</Option>
               <Option value="SUPERVISOR_AUDITOR">Supervisor Auditor</Option>
-            </Select>
-          </SelectField>
-          <SelectField id="status" label="Estado" error={errors.status?.message} required>
-            <Select id="status" {...register("status")}>
-              <Option value="ACTIVO">Activo</Option>
-              <Option value="INACTIVO">Inactivo</Option>
             </Select>
           </SelectField>
         </div>
