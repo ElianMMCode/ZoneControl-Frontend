@@ -133,19 +133,6 @@ export function AdminDashboard() {
           onRefresh={history.refresh}
         />
       </div>
-
-      <section className="card">
-        <header className="card-header">
-          <h2 className="text-heading-md">Monitoreo Geográfico</h2>
-          <span className="label-caps">Próximamente</span>
-        </header>
-        <div className="flex flex-col items-center gap-2 py-6 text-center text-on-surface-variant">
-          <span className="rounded-full bg-surface-container p-4 text-primary">
-            <Icon name="map" size="lg" />
-          </span>
-          <p className="text-body-sm">Mapa de accesos en tiempo real — disponible próximamente.</p>
-        </div>
-      </section>
     </div>
   );
 }
