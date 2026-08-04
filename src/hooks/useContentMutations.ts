@@ -6,7 +6,7 @@ import type {
   ProductRequest,
 } from "@/types";
 
-type ContentSection = "INSTITUTIONAL" | "CONTACT" | "LOCATIONS";
+type ContentSection = "INSTITUTIONAL" | "CONTACT";
 
 export function useContentMutations() {
   const [loading, setLoading] = useState(false);
