@@ -17,6 +17,7 @@ import { BulkUploadView } from "@/views/personal/BulkUploadView";
 import { EmployeeDetailView } from "@/views/personal/EmployeeDetailView";
 import { PermissionsView } from "@/views/personal/PermissionsView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
+import { SettingsView } from "@/views/settings/SettingsView";
 import { NotFoundView } from "@/views/NotFoundView";
 import type { Role } from "@/types";
 
@@ -144,6 +145,15 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
             <SupervisorDashboard />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/ajustes",
+        handle: { title: "Ajustes y Perfil" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
+            <SettingsView />
           </RequireRole>
         ),
       },

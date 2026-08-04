@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -7,21 +7,34 @@ import { Icon } from "@/components/ui/Icon";
 import { StatusPill } from "@/components/common/StatusPill";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
+import { Modal } from "@/components/ui/Modal";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { FormField } from "@/components/ui/Input";
+import { Select, Option } from "@/components/ui/Select";
 import { useResource } from "@/hooks/useResource";
-import { isApiError } from "@/lib/api";
+import { apiFetch, isApiError } from "@/lib/api";
 import {
+  useAreas,
+  useDepartments,
   useEmployeeAccessHistory,
   useEmployeeMutations,
   useEmployeePermissions,
+  useOffices,
+  usePermissionMutations,
 } from "@/hooks/useGestor";
+import { PermissionFormModal, type PermissionFormValues } from "@/components/domain/PermissionFormModal";
 import {
   CONTRACT_TYPE_LABELS,
   WORK_SHIFT_LABELS,
 } from "@/types";
 import type {
   AccessHistoryRecord,
+  ContractType,
+  DocumentType,
   EmployeeSearchResponse,
+  EmployeeStatus,
   PermissionResponse,
+  WorkShift,
 } from "@/types";
 
 function formatDate(value: string | null | undefined) {
@@ -47,11 +60,18 @@ export function EmployeeDetailView() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoTick, setPhotoTick] = useState(0);
+  const [editing, setEditing] = useState(false);
+  const [assigningArea, setAssigningArea] = useState(false);
+  const [editingPermission, setEditingPermission] = useState<PermissionResponse | null>(null);
+  const [revoking, setRevoking] = useState<PermissionResponse | null>(null);
+  const [showFullHistory, setShowFullHistory] = useState(false);
 
   const employee = useResource<EmployeeSearchResponse>(id ? `/api/personal/${id}` : null, undefined, [id]);
   const permissions = useEmployeePermissions(id ?? null);
   const history = useEmployeeAccessHistory(id ?? null, 20);
-  const { uploadPhoto, deletePhoto } = useEmployeeMutations();
+  const { uploadPhoto, deletePhoto, update } = useEmployeeMutations();
+  const { create: createPermission, update: updatePermission, revoke: revokePermission } = usePermissionMutations();
+  const areas = useAreas();
 
   const photoUrl = employee.data?.photoUrl
     ? `${employee.data.photoUrl}?t=${photoTick}`
@@ -81,6 +101,75 @@ export function EmployeeDetailView() {
     } catch (err) {
       if (isApiError(err)) toast.error(err.message);
       else toast.error("No se pudo eliminar la foto");
+    }
+  };
+
+  const onSaveEmployee = async (values: ReturnType<typeof toUpdateRequest>) => {
+    if (!id) return false;
+    try {
+      await update(id, values);
+      toast.success("Empleado actualizado");
+      employee.refresh();
+      permissions.refresh();
+      setEditing(false);
+      return true;
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo actualizar el empleado");
+      return false;
+    }
+  };
+
+  const onAssignArea = async (values: PermissionFormValues) => {
+    if (!employee.data) return false;
+    try {
+      await createPermission({
+        employeeCode: employee.data.employeeCode,
+        productionAreaName: values.productionAreaName,
+        startDate: values.startDate,
+        expirationDate: values.expirationDate,
+        startTime: values.startTime,
+        endTime: values.endTime,
+      });
+      toast.success("Permiso otorgado");
+      permissions.refresh();
+      return true;
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo otorgar el permiso");
+      return false;
+    }
+  };
+
+  const onEditPermission = async (values: PermissionFormValues) => {
+    if (!editingPermission) return false;
+    try {
+      await updatePermission(editingPermission.id, {
+        startDate: values.startDate,
+        expirationDate: values.expirationDate,
+        startTime: values.startTime,
+        endTime: values.endTime,
+      });
+      toast.success("Permiso actualizado");
+      permissions.refresh();
+      return true;
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo actualizar el permiso");
+      return false;
+    }
+  };
+
+  const onRevoke = async () => {
+    if (!revoking) return;
+    try {
+      await revokePermission(revoking.id);
+      toast.success("Permiso revocado");
+      setRevoking(null);
+      permissions.refresh();
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo revocar el permiso");
     }
   };
 
@@ -146,34 +235,43 @@ export function EmployeeDetailView() {
               )}
             </div>
           </div>
-          <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Documento" value={`${e.documentType} ${e.documentNumber}`} />
-            <Field label="Estado" value={<StatusPill status={e.status} />} />
-            <Field label="Cargo" value={e.position} />
-            <Field label="Departamento" value={e.departmentName} />
-            <Field label="Email" value={e.email ?? "—"} />
-            <Field
-              label="Rol de sistema"
-              value={e.systemRole ?? "—"}
+
+          {editing ? (
+            <EditEmployeeForm
+              employee={e}
+              onCancel={() => setEditing(false)}
+              onSave={onSaveEmployee}
             />
-            <Field
-              label="Tipo de contrato"
-              value={e.contractType ? CONTRACT_TYPE_LABELS[e.contractType] : "—"}
-            />
-            <Field label="Ubicación base" value={e.baseOfficeName ?? "—"} />
-            <Field
-              label="Horario / turno"
-              value={e.workShift ? WORK_SHIFT_LABELS[e.workShift] : "—"}
-            />
-            <Field label="Fecha de ingreso" value={formatDate(e.hireDate)} />
-            <Field label="Fin de contrato" value={formatDate(e.contractEndDate)} />
-            <Field label="Vigencia" value={formatDate(e.hireDate) + " → " + formatDate(e.contractEndDate)} />
-          </div>
+          ) : (
+            <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Documento" value={`${e.documentType} ${e.documentNumber}`} />
+              <Field label="Estado" value={<StatusPill status={e.status} />} />
+              <Field label="Cargo" value={e.position} />
+              <Field label="Departamento" value={e.departmentName} />
+              <Field label="Email" value={e.email ?? "—"} />
+              <Field label="Rol de sistema" value={e.systemRole ?? "—"} />
+              <Field label="Tipo de contrato" value={e.contractType ? CONTRACT_TYPE_LABELS[e.contractType] : "—"} />
+              <Field label="Ubicación base" value={e.baseOfficeName ?? "—"} />
+              <Field label="Horario / turno" value={e.workShift ? WORK_SHIFT_LABELS[e.workShift] : "—"} />
+              <Field label="Fecha de ingreso" value={formatDate(e.hireDate)} />
+              <Field label="Fin de contrato" value={formatDate(e.contractEndDate)} />
+              <div className="flex items-end">
+                <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>
+                  <Icon name="edit" size="sm" /> Editar información
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       <section className="card space-y-3">
-        <h3 className="heading-sm text-on-surface">Permisos del Empleado</h3>
+        <header className="card-header">
+          <h3 className="heading-sm text-on-surface">Permisos del Empleado</h3>
+          <Button size="sm" onClick={() => setAssigningArea(true)}>
+            <Icon name="add" size="sm" /> Asignar nueva área
+          </Button>
+        </header>
         {permissions.loading ? (
           <Skeleton className="h-10 w-full" />
         ) : permissions.error ? (
@@ -187,26 +285,42 @@ export function EmployeeDetailView() {
         ) : (
           <ul className="divide-y divide-outline-variant">
             {permissions.data.map((p: PermissionResponse) => (
-              <li key={p.id} className="grid grid-cols-1 gap-2 py-3 sm:grid-cols-4 sm:items-center">
-                <div>
-                  <p className="label-caps">Área</p>
-                  <p className="text-body-md">{p.areaName}</p>
+              <li key={p.id} className="grid grid-cols-1 gap-2 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-4 sm:items-center">
+                  <div>
+                    <p className="label-caps">Área</p>
+                    <p className="text-body-md">{p.areaName}</p>
+                  </div>
+                  <div>
+                    <p className="label-caps">Horario</p>
+                    <p className="text-body-md font-mono">
+                      {p.startTime.slice(0, 5)} – {p.endTime.slice(0, 5)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="label-caps">Vigencia</p>
+                    <p className="text-body-md">
+                      {formatDate(p.startDate)} → {formatDate(p.expirationDate)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="label-caps">Estado</p>
+                    <StatusPill status={p.status} />
+                  </div>
                 </div>
-                <div>
-                  <p className="label-caps">Horario</p>
-                  <p className="text-body-md font-mono">
-                    {p.startTime.slice(0, 5)} – {p.endTime.slice(0, 5)}
-                  </p>
-                </div>
-                <div>
-                  <p className="label-caps">Vigencia</p>
-                  <p className="text-body-md">
-                    {formatDate(p.startDate)} → {formatDate(p.expirationDate)}
-                  </p>
-                </div>
-                <div>
-                  <p className="label-caps">Estado</p>
-                  <StatusPill status={p.status} />
+                <div className="flex items-center gap-1 sm:justify-end">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setEditingPermission(p)}
+                    title="Editar permiso"
+                    disabled={p.status === "SUSPENDIDO"}
+                  >
+                    <Icon name="edit" size="sm" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setRevoking(p)} title="Revocar permiso">
+                    <Icon name="delete" size="sm" />
+                  </Button>
                 </div>
               </li>
             ))}
@@ -215,7 +329,12 @@ export function EmployeeDetailView() {
       </section>
 
       <section className="card space-y-3">
-        <h3 className="heading-sm text-on-surface">Historial de accesos</h3>
+        <header className="card-header">
+          <h3 className="heading-sm text-on-surface">Historial de accesos</h3>
+          <Button size="sm" variant="secondary" onClick={() => setShowFullHistory(true)}>
+            <Icon name="history" size="sm" /> Ver historial completo
+          </Button>
+        </header>
         {history.loading ? (
           <Skeleton className="h-10 w-full" />
         ) : history.error ? (
@@ -240,6 +359,45 @@ export function EmployeeDetailView() {
           </ul>
         )}
       </section>
+
+      <PermissionFormModal
+        open={assigningArea}
+        onClose={() => setAssigningArea(false)}
+        onSubmit={onAssignArea}
+        areas={areas.data ?? []}
+        areasLoading={areas.loading}
+        fixedEmployeeCode={e.employeeCode}
+      />
+
+      <PermissionFormModal
+        open={!!editingPermission}
+        onClose={() => setEditingPermission(null)}
+        onSubmit={onEditPermission}
+        initial={editingPermission}
+        areas={areas.data ?? []}
+        areasLoading={areas.loading}
+      />
+
+      <ConfirmDialog
+        open={!!revoking}
+        title="Revocar permiso"
+        message={
+          revoking
+            ? `¿Seguro que deseas revocar el permiso de ${revoking.employeeName} para el área ${revoking.areaName}? Esta acción es permanente.`
+            : ""
+        }
+        confirmLabel="Revocar"
+        tone="danger"
+        onCancel={() => setRevoking(null)}
+        onConfirm={onRevoke}
+      />
+
+      <FullHistoryModal
+        open={showFullHistory}
+        onClose={() => setShowFullHistory(false)}
+        employeeId={id ?? null}
+        employeeName={`${e.firstName} ${e.lastName}`}
+      />
     </div>
   );
 }
@@ -250,5 +408,230 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
       <p className="label-caps">{label}</p>
       <div className="text-body-md text-on-surface">{value}</div>
     </div>
+  );
+}
+
+function toUpdateRequest(form: EditFormValues) {
+  return {
+    firstName: form.firstName,
+    lastName: form.lastName,
+    position: form.position,
+    email: form.email || undefined,
+    documentType: form.documentType,
+    documentNumber: form.documentNumber,
+    departmentName: form.departmentName,
+    status: form.status,
+    contractType: (form.contractType || undefined) as ContractType | undefined,
+    baseOfficeName: form.baseOfficeName || undefined,
+    workShift: (form.workShift || undefined) as WorkShift | undefined,
+    hireDate: form.hireDate || undefined,
+    contractEndDate: form.contractEndDate || undefined,
+  };
+}
+
+type EditFormValues = {
+  documentType: DocumentType;
+  documentNumber: string;
+  firstName: string;
+  lastName: string;
+  position: string;
+  departmentName: string;
+  email: string;
+  status: EmployeeStatus;
+  contractType: string;
+  baseOfficeName: string;
+  workShift: string;
+  hireDate: string;
+  contractEndDate: string;
+};
+
+function EditEmployeeForm({
+  employee,
+  onCancel,
+  onSave,
+}: {
+  employee: EmployeeSearchResponse;
+  onCancel: () => void;
+  onSave: (values: ReturnType<typeof toUpdateRequest>) => Promise<boolean>;
+}) {
+  const departments = useDepartments();
+  const offices = useOffices();
+  const [form, setForm] = useState<EditFormValues>({
+    documentType: employee.documentType,
+    documentNumber: employee.documentNumber,
+    firstName: employee.firstName,
+    lastName: employee.lastName,
+    position: employee.position,
+    departmentName: employee.departmentName,
+    email: employee.email ?? "",
+    status: employee.status,
+    contractType: employee.contractType ?? "",
+    baseOfficeName: employee.baseOfficeName ?? "",
+    workShift: employee.workShift ?? "",
+    hireDate: employee.hireDate ?? "",
+    contractEndDate: employee.contractEndDate ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const onChange = <K extends keyof EditFormValues>(key: K, value: EditFormValues[K]) => {
+    setForm((f) => ({ ...f, [key]: value }));
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onSave(toUpdateRequest(form));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="flex-1 space-y-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <FormField id="edit-docType" label="Tipo documento" required>
+          <Select id="edit-docType" value={form.documentType} onChange={(e) => onChange("documentType", e.target.value as DocumentType)}>
+            <Option value="CC">CC</Option>
+            <Option value="CE">CE</Option>
+            <Option value="TI">TI</Option>
+            <Option value="PA">PA</Option>
+            <Option value="RC">RC</Option>
+          </Select>
+        </FormField>
+        <FormField id="edit-docNum" label="Nº documento" required>
+          <input id="edit-docNum" className="input" maxLength={20} value={form.documentNumber} onChange={(e) => onChange("documentNumber", e.target.value)} required />
+        </FormField>
+        <FormField id="edit-firstName" label="Nombres" required>
+          <input id="edit-firstName" className="input" maxLength={35} value={form.firstName} onChange={(e) => onChange("firstName", e.target.value)} required />
+        </FormField>
+        <FormField id="edit-lastName" label="Apellidos" required>
+          <input id="edit-lastName" className="input" maxLength={35} value={form.lastName} onChange={(e) => onChange("lastName", e.target.value)} required />
+        </FormField>
+        <FormField id="edit-position" label="Cargo" required>
+          <input id="edit-position" className="input" maxLength={30} value={form.position} onChange={(e) => onChange("position", e.target.value)} required />
+        </FormField>
+        <FormField id="edit-email" label="Email">
+          <input id="edit-email" type="email" className="input" value={form.email} onChange={(e) => onChange("email", e.target.value)} />
+        </FormField>
+        <FormField id="edit-dept" label="Departamento" required>
+          <Select id="edit-dept" value={form.departmentName} onChange={(e) => onChange("departmentName", e.target.value)} disabled={departments.loading}>
+            <Option value="">Seleccione…</Option>
+            {departments.data?.map((d) => (
+              <Option key={d} value={d}>{d}</Option>
+            ))}
+          </Select>
+        </FormField>
+        <FormField id="edit-status" label="Estado" required>
+          <Select id="edit-status" value={form.status} onChange={(e) => onChange("status", e.target.value as EmployeeStatus)}>
+            <Option value="ACTIVO">Activo</Option>
+            <Option value="INACTIVO">Inactivo</Option>
+            <Option value="SUSPENDIDO">Suspendido</Option>
+          </Select>
+        </FormField>
+        <FormField id="edit-contractType" label="Tipo de contrato">
+          <Select id="edit-contractType" value={form.contractType} onChange={(e) => onChange("contractType", e.target.value)}>
+            <Option value="">— Sin definir —</Option>
+            {(Object.keys(CONTRACT_TYPE_LABELS) as (keyof typeof CONTRACT_TYPE_LABELS)[]).map((c) => (
+              <Option key={c} value={c}>{CONTRACT_TYPE_LABELS[c]}</Option>
+            ))}
+          </Select>
+        </FormField>
+        <FormField id="edit-office" label="Ubicación base">
+          <Select id="edit-office" value={form.baseOfficeName} onChange={(e) => onChange("baseOfficeName", e.target.value)} disabled={offices.loading}>
+            <Option value="">— Sin sede asignada —</Option>
+            {offices.data?.map((o) => (
+              <Option key={o.id} value={o.name}>{o.name}</Option>
+            ))}
+          </Select>
+        </FormField>
+        <FormField id="edit-shift" label="Horario / turno">
+          <Select id="edit-shift" value={form.workShift} onChange={(e) => onChange("workShift", e.target.value)}>
+            <Option value="">— Sin definir —</Option>
+            {(Object.keys(WORK_SHIFT_LABELS) as (keyof typeof WORK_SHIFT_LABELS)[]).map((w) => (
+              <Option key={w} value={w}>{WORK_SHIFT_LABELS[w]}</Option>
+            ))}
+          </Select>
+        </FormField>
+        <FormField id="edit-hire" label="Fecha de ingreso">
+          <input id="edit-hire" type="date" className="input" value={form.hireDate} onChange={(e) => onChange("hireDate", e.target.value)} />
+        </FormField>
+        <FormField id="edit-end" label="Fin de contrato">
+          <input id="edit-end" type="date" className="input" value={form.contractEndDate} onChange={(e) => onChange("contractEndDate", e.target.value)} />
+        </FormField>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" onClick={onCancel} disabled={saving}>Cancelar</Button>
+        <Button type="submit" loading={saving}>
+          <Icon name="save" size="sm" /> Guardar cambios
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function FullHistoryModal({
+  open,
+  onClose,
+  employeeId,
+  employeeName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  employeeId: string | null;
+  employeeName: string;
+}) {
+  const [records, setRecords] = useState<AccessHistoryRecord[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open || !employeeId) return;
+    const ctrl = new AbortController();
+    setLoading(true);
+    setError(null);
+    apiFetch<AccessHistoryRecord[]>(`/api/personal/${employeeId}/accesos`, {
+      query: { limit: 200 },
+      signal: ctrl.signal,
+    })
+      .then(setRecords)
+      .catch((e) => {
+        if ((e as { name?: string })?.name === "AbortError") return;
+        if (isApiError(e)) setError(e.message);
+        else setError("No se pudo cargar el historial");
+      })
+      .finally(() => setLoading(false));
+    return () => ctrl.abort();
+  }, [open, employeeId]);
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Historial completo de accesos"
+      description={employeeName}
+      size="lg"
+      footer={<Button variant="ghost" onClick={onClose}>Cerrar</Button>}
+    >
+      {loading ? (
+        <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-9 w-full" />)}</div>
+      ) : error ? (
+        <ErrorState message={error} />
+      ) : !records || records.length === 0 ? (
+        <EmptyState title="Sin movimientos" description="No se registran accesos para este empleado." icon="history" />
+      ) : (
+        <ul className="max-h-[50vh] divide-y divide-outline-variant overflow-auto">
+          {records.map((h) => (
+            <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+              <div className="flex items-center gap-2">
+                <StatusPill status={h.result} />
+                <span className="text-body-md">{h.productionAreaName ?? "—"}</span>
+              </div>
+              <span className="text-body-sm text-on-surface-variant">{formatDateTime(h.timestamp)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Modal>
   );
 }

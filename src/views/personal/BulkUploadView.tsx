@@ -9,6 +9,17 @@ import { isApiError, apiDownload } from "@/lib/api";
 import { useBulkUpload } from "@/hooks/useGestor";
 import type { BulkUploadResult } from "@/types";
 
+type BulkUploadError = { row: string; field: string; reason: string };
+
+function parseErrorReport(csv: string): BulkUploadError[] {
+  const lines = csv.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  const rows = lines.slice(1);
+  return rows.map((line) => {
+    const [row, field, ...rest] = line.split(";");
+    return { row: row ?? "—", field: field ?? "—", reason: rest.join(";") || "—" };
+  });
+}
+
 export function BulkUploadView() {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
@@ -16,6 +27,8 @@ export function BulkUploadView() {
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { upload } = useBulkUpload();
+
+  const errors = result?.errorReportUrl ? parseErrorReport(result.errorReportUrl) : [];
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] ?? null);
@@ -170,6 +183,29 @@ export function BulkUploadView() {
               </Button>
             </div>
           )}
+
+          {errors.length > 0 ? (
+            <div className="overflow-x-auto rounded-lg border border-outline-variant">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Fila</th>
+                    <th>Campo</th>
+                    <th>Detalle del error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {errors.map((err, i) => (
+                    <tr key={`${err.row}-${i}`}>
+                      <td className="font-mono text-body-sm">Fila {err.row}</td>
+                      <td className="text-body-sm">{err.field}</td>
+                      <td className="text-body-sm text-error">{err.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
         </section>
       )}
     </div>

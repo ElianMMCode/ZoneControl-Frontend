@@ -11,9 +11,11 @@ import { Modal } from "@/components/ui/Modal";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusPill } from "@/components/common/StatusPill";
+import { StatCard } from "@/components/common/StatCard";
 import { useResource } from "@/hooks/useResource";
 import { isApiError } from "@/lib/api";
-import { usePermissionMutations } from "@/hooks/useGestor";
+import { useAreas, usePermissionMutations } from "@/hooks/useGestor";
+import { PermissionFormModal, type PermissionFormValues } from "@/components/domain/PermissionFormModal";
 import type { Page, PermissionResponse, PermissionStatus } from "@/types";
 
 function formatDate(value: string) {
@@ -34,6 +36,8 @@ export function PermissionsView() {
   const [page, setPage] = useState(0);
   const [suspendTarget, setSuspendTarget] = useState<PermissionResponse | null>(null);
   const [reactivationDate, setReactivationDate] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [editingPermission, setEditingPermission] = useState<PermissionResponse | null>(null);
 
   const data = useResource<Page<PermissionResponse>>("/api/permisos", {
     search: search || undefined,
@@ -42,7 +46,20 @@ export function PermissionsView() {
     size: 10,
   }, [search, status, page]);
 
-  const { suspend, reactivate, revoke } = usePermissionMutations();
+  const activeCount = useResource<Page<PermissionResponse>>("/api/permisos", {
+    status: "ACTIVO",
+    page: 0,
+    size: 1,
+  }, []);
+  const suspendedCount = useResource<Page<PermissionResponse>>("/api/permisos", {
+    status: "SUSPENDIDO",
+    page: 0,
+    size: 1,
+  }, []);
+
+  const areas = useAreas();
+
+  const { suspend, reactivate, revoke, create, update } = usePermissionMutations();
 
   const onReactivate = async (id: string) => {
     try {
@@ -84,6 +101,45 @@ export function PermissionsView() {
     }
   };
 
+  const onCreate = async (values: PermissionFormValues) => {
+    try {
+      await create({
+        employeeCode: values.employeeCode,
+        productionAreaName: values.productionAreaName,
+        startDate: values.startDate,
+        expirationDate: values.expirationDate,
+        startTime: values.startTime,
+        endTime: values.endTime,
+      });
+      toast.success("Permiso otorgado");
+      data.refresh();
+      return true;
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo otorgar el permiso");
+      return false;
+    }
+  };
+
+  const onEdit = async (values: PermissionFormValues) => {
+    if (!editingPermission) return false;
+    try {
+      await update(editingPermission.id, {
+        startDate: values.startDate,
+        expirationDate: values.expirationDate,
+        startTime: values.startTime,
+        endTime: values.endTime,
+      });
+      toast.success("Permiso actualizado");
+      data.refresh();
+      return true;
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo actualizar el permiso");
+      return false;
+    }
+  };
+
   const columns: Column<PermissionResponse>[] = useMemo(
     () => [
       { key: "emp", header: "Empleado", render: (p) => (
@@ -108,6 +164,11 @@ export function PermissionsView() {
             </Button>
           )}
           {p.status === "ACTIVO" && (
+            <Button size="sm" variant="secondary" onClick={() => setEditingPermission(p)} title="Editar">
+              <Icon name="edit" size="sm" />
+            </Button>
+          )}
+          {p.status === "ACTIVO" && (
             <Button size="sm" variant="secondary" onClick={() => {
               setSuspendTarget(p);
               setReactivationDate("");
@@ -129,7 +190,33 @@ export function PermissionsView() {
       <PageHeader
         title="Gestión de Permisos"
         subtitle="Permisos de acceso por empleado y área"
+        actions={
+          <Button onClick={() => setCreating(true)}>
+            <Icon name="add" size="sm" /> Otorgar permiso
+          </Button>
+        }
       />
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatCard
+          icon="vpn_key"
+          label="Permisos activos"
+          value={activeCount.data?.totalElements ?? 0}
+          tone="secondary"
+        />
+        <StatCard
+          icon="pause_circle"
+          label="Permisos suspendidos"
+          value={suspendedCount.data?.totalElements ?? 0}
+          tone="error"
+        />
+        <StatCard
+          icon="domain"
+          label="Áreas disponibles"
+          value={areas.data?.length ?? 0}
+          tone="primary"
+        />
+      </div>
 
       <section className="card space-y-4">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -211,6 +298,24 @@ export function PermissionsView() {
           />
         </FormField>
       </Modal>
+
+      <PermissionFormModal
+        open={creating}
+        onClose={() => setCreating(false)}
+        onSubmit={onCreate}
+        showEmployeeSelector
+        areas={areas.data ?? []}
+        areasLoading={areas.loading}
+      />
+
+      <PermissionFormModal
+        open={!!editingPermission}
+        onClose={() => setEditingPermission(null)}
+        onSubmit={onEdit}
+        initial={editingPermission}
+        areas={areas.data ?? []}
+        areasLoading={areas.loading}
+      />
     </div>
   );
 }
