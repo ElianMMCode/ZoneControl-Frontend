@@ -3,6 +3,7 @@ import { StatusPill } from "@/components/common/StatusPill";
 import { RolePill } from "@/components/common/RolePill";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { Tooltip } from "@/components/ui/Tooltip";
 import type { UserResponse } from "@/types";
 
 export function UserTable({
@@ -28,20 +29,26 @@ export function UserTable({
       align: "right",
       render: (u) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(u)} aria-label={`Editar ${u.firstName} ${u.lastName}`}>
-            <Icon name="edit" size="sm" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onToggleStatus(u)}
-            aria-label={u.status === "ACTIVO" ? `Desactivar ${u.firstName}` : `Activar ${u.firstName}`}
-          >
-            <Icon name={u.status === "ACTIVO" ? "power_settings_new" : "check_circle"} size="sm" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => onResetPassword(u)} aria-label={`Restablecer contraseña de ${u.firstName}`}>
-            <Icon name="key" size="sm" />
-          </Button>
+          <Tooltip label="Editar usuario">
+            <Button variant="ghost" size="sm" onClick={() => onEdit(u)} aria-label={`Editar ${u.firstName} ${u.lastName}`}>
+              <Icon name="edit" size="sm" />
+            </Button>
+          </Tooltip>
+          <Tooltip label={u.status === "ACTIVO" ? "Desactivar usuario" : "Activar usuario"}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onToggleStatus(u)}
+              aria-label={u.status === "ACTIVO" ? `Desactivar ${u.firstName}` : `Activar ${u.firstName}`}
+            >
+              <Icon name={u.status === "ACTIVO" ? "power_settings_new" : "check_circle"} size="sm" />
+            </Button>
+          </Tooltip>
+          <Tooltip label="Restablecer contraseña">
+            <Button variant="ghost" size="sm" onClick={() => onResetPassword(u)} aria-label={`Restablecer contraseña de ${u.firstName}`}>
+              <Icon name="key" size="sm" />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },

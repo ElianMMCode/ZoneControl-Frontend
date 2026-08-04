@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable, type Column } from "@/components/common/DataTable";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { InstitutionalForm } from "@/components/admin/content/InstitutionalForm";
 import { ContactForm } from "@/components/admin/content/ContactForm";
 import { OfficeFormModal } from "@/components/admin/content/OfficeFormModal";
@@ -162,12 +163,16 @@ function OfficesPanel({
       align: "right",
       render: (o) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setEditing(o)} aria-label={`Editar ${o.name}`}>
-            <Icon name="edit" size="sm" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setDeleting(o)} aria-label={`Eliminar ${o.name}`}>
-            <Icon name="delete" size="sm" />
-          </Button>
+          <Tooltip label="Editar sede">
+            <Button variant="ghost" size="sm" onClick={() => setEditing(o)} aria-label={`Editar ${o.name}`}>
+              <Icon name="edit" size="sm" />
+            </Button>
+          </Tooltip>
+          <Tooltip label="Eliminar sede">
+            <Button variant="ghost" size="sm" onClick={() => setDeleting(o)} aria-label={`Eliminar ${o.name}`}>
+              <Icon name="delete" size="sm" />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },
@@ -300,12 +305,16 @@ function ProductsPanel({
       align: "right",
       render: (p) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setEditing(p)} aria-label={`Editar ${p.name}`}>
-            <Icon name="edit" size="sm" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setDeleting(p)} aria-label={`Eliminar ${p.name}`}>
-            <Icon name="delete" size="sm" />
-          </Button>
+          <Tooltip label="Editar producto">
+            <Button variant="ghost" size="sm" onClick={() => setEditing(p)} aria-label={`Editar ${p.name}`}>
+              <Icon name="edit" size="sm" />
+            </Button>
+          </Tooltip>
+          <Tooltip label="Eliminar producto">
+            <Button variant="ghost" size="sm" onClick={() => setDeleting(p)} aria-label={`Eliminar ${p.name}`}>
+              <Icon name="delete" size="sm" />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },

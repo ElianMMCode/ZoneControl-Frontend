@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
 import { Icon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { isApiError } from "@/lib/api";
@@ -71,12 +72,16 @@ export function AdminAreasView() {
     { key: "desc", header: "Descripción", render: (a) => a.description ?? "—" },
     { key: "actions", header: "", align: "right", render: (a) => (
       <div className="flex items-center justify-end gap-1">
-        <Button size="sm" variant="secondary" onClick={() => openEdit(a)} title="Editar">
-          <Icon name="edit" size="sm" />
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => onDelete(a)} title="Eliminar">
-          <Icon name="delete" size="sm" />
-        </Button>
+        <Tooltip label="Editar área">
+          <Button size="sm" variant="secondary" onClick={() => openEdit(a)} title="Editar">
+            <Icon name="edit" size="sm" />
+          </Button>
+        </Tooltip>
+        <Tooltip label="Eliminar área">
+          <Button size="sm" variant="ghost" onClick={() => onDelete(a)} title="Eliminar">
+            <Icon name="delete" size="sm" />
+          </Button>
+        </Tooltip>
       </div>
     ) },
   ];
