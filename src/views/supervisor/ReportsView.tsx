@@ -34,6 +34,7 @@ export function ReportsView() {
   const [fechaInicio, setFechaInicio] = useState(iso(thirtyDaysAgo));
   const [fechaFin, setFechaFin] = useState(iso(today));
   const [employeeCode, setEmployeeCode] = useState("");
+  const [department, setDepartment] = useState("");
   const [resultado, setResultado] = useState<AccessResult | "">("");
   const [page, setPage] = useState(0);
   const [exporting, setExporting] = useState<ReportFormat | null>(null);
@@ -48,15 +49,17 @@ export function ReportsView() {
     fechaInicio,
     fechaFin,
     employeeCode: employeeCode || undefined,
+    department: department || undefined,
     resultado: resultado || undefined,
     page,
     size: 10,
-  }, [fechaInicio, fechaFin, employeeCode, resultado, page]);
+  }, [fechaInicio, fechaFin, employeeCode, department, resultado, page]);
 
   const exportFilters = {
     fechaInicio,
     fechaFin,
     employeeCode: employeeCode || undefined,
+    departamentoName: department || undefined,
     resultado: resultado || undefined,
   };
 
@@ -67,7 +70,8 @@ export function ReportsView() {
         method: "POST",
         body: { formato, ...exportFilters },
       });
-      downloadBlob(blob, filename ?? `historial_accesos.${formato === "CSV" ? "csv" : "xlsx"}`);
+      const ext = formato === "CSV" ? "csv" : formato === "EXCEL" ? "xlsx" : "pdf";
+      downloadBlob(blob, filename ?? `historial_accesos.${ext}`);
       toast.success(`Historial exportado en ${formato}`);
     } catch (err) {
       if (isApiError(err)) toast.error(err.message);
@@ -84,7 +88,8 @@ export function ReportsView() {
         method: "POST",
         body: { mes, anio, formato: formatoPeriodico },
       });
-      downloadBlob(blob, filename ?? `archivo_periodico_${mes}_${anio}.${formatoPeriodico === "CSV" ? "csv" : "xlsx"}`);
+      const ext = formatoPeriodico === "CSV" ? "csv" : formatoPeriodico === "EXCEL" ? "xlsx" : "pdf";
+      downloadBlob(blob, filename ?? `archivo_periodico_${mes}_${anio}.${ext}`);
       toast.success(`Archivo periódico generado (${formatoPeriodico})`);
     } catch (err) {
       if (isApiError(err)) toast.error(err.message);
@@ -135,10 +140,13 @@ export function ReportsView() {
             <Button variant="secondary" size="sm" onClick={() => onExport("EXCEL")} loading={exporting === "EXCEL"}>
               <Icon name="download" size="sm" /> Excel
             </Button>
+            <Button variant="secondary" size="sm" onClick={() => onExport("PDF")} loading={exporting === "PDF"}>
+              <Icon name="download" size="sm" /> PDF
+            </Button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <FormField id="fechaInicio" label="Fecha inicio" required>
             <input id="fechaInicio" type="date" className="input" value={fechaInicio} onChange={(e) => { setFechaInicio(e.target.value); setPage(0); }} />
           </FormField>
@@ -147,6 +155,9 @@ export function ReportsView() {
           </FormField>
           <FormField id="employeeCode" label="Código de empleado">
             <input id="employeeCode" className="input font-mono" value={employeeCode} onChange={(e) => { setEmployeeCode(e.target.value); setPage(0); }} placeholder="EMP-000001" />
+          </FormField>
+          <FormField id="department" label="Departamento">
+            <input id="department" className="input" value={department} onChange={(e) => { setDepartment(e.target.value); setPage(0); }} placeholder="Control de Calidad" />
           </FormField>
           <FormField id="resultado" label="Resultado">
             <Select id="resultado" value={resultado} onChange={(e) => { setResultado(e.target.value as AccessResult | ""); setPage(0); }}>
@@ -200,6 +211,7 @@ export function ReportsView() {
             <Select id="formatoPeriodico" value={formatoPeriodico} onChange={(e) => setFormatoPeriodico(e.target.value as ReportFormat)}>
               <Option value="CSV">CSV</Option>
               <Option value="EXCEL">Excel</Option>
+              <Option value="PDF">PDF</Option>
             </Select>
           </FormField>
           <div className="flex items-end">
