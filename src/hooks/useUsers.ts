@@ -16,12 +16,12 @@ export function useUserMutations() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
 
-  const create = useCallback(async (body: CreateUserRequest): Promise<string | null> => {
+  const create = useCallback(async (body: CreateUserRequest): Promise<{ id: string; setupUrl: string } | null> => {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch<{ id: string }>("/api/admin/users", { method: "POST", body });
-      return res.id;
+      const res = await apiFetch<{ id: string; setupUrl: string }>("/api/admin/users", { method: "POST", body });
+      return res;
     } catch (e) {
       if (isApiError(e)) setError(e);
       return null;
@@ -59,12 +59,12 @@ export function useUserMutations() {
     }
   }, []);
 
-  const resetPassword = useCallback(async (id: string): Promise<string | null> => {
+  const resetPassword = useCallback(async (id: string): Promise<{ message: string; setupUrl: string } | null> => {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch<{ message: string }>(`/api/admin/users/${id}/reset-password`, { method: "POST" });
-      return res.message;
+      const res = await apiFetch<{ message: string; setupUrl: string }>(`/api/admin/users/${id}/reset-password`, { method: "POST" });
+      return res;
     } catch (e) {
       if (isApiError(e)) setError(e);
       return null;

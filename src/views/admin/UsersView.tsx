@@ -263,17 +263,18 @@ export function UsersView() {
         title="Restablecer contraseña"
         message={
           resetting
-            ? `Se enviará un nuevo enlace de configuración a ${resetting.email}.`
+            ? `Se abrirá una nueva ventana para configurar la contraseña de ${resetting.email}. La contraseña actual dejará de ser válida y el enlace expirará en 24 horas.`
             : ""
         }
-        confirmLabel="Enviar enlace"
+        confirmLabel="Abrir configuración"
         loading={mutating}
         onCancel={() => setResetting(null)}
         onConfirm={async () => {
           if (!resetting) return;
-          const msg = await resetPassword(resetting.id);
-          if (msg) {
-            toast.success(msg);
+          const res = await resetPassword(resetting.id);
+          if (res) {
+            toast.success(res.message);
+            window.open(res.setupUrl, "_blank", "noopener");
             setResetting(null);
           } else {
             toast.error(error?.message ?? "No se pudo enviar el enlace");

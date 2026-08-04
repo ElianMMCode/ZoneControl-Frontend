@@ -4,12 +4,14 @@ import { z } from "zod";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
+import { Select, SelectField, Option } from "@/components/ui/Select";
 import { RolePill } from "@/components/common/RolePill";
 import { StatusPill } from "@/components/common/StatusPill";
-import type { UpdateUserRequest, UserResponse } from "@/types";
+import type { UpdateUserRequest, UserResponse, UserStatus } from "@/types";
 
 const schema = z.object({
   email: z.string().email("Email inválido").max(100),
+  status: z.enum(["ACTIVO", "INACTIVO"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -33,12 +35,12 @@ export function UserFormModal({
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    defaultValues: { email: "" },
+    defaultValues: { email: "", status: "ACTIVO" as UserStatus },
   });
 
   useEffect(() => {
     if (user) {
-      reset({ email: user.email });
+      reset({ email: user.email, status: user.status });
     }
   }, [user, reset]);
 
@@ -79,18 +81,25 @@ export function UserFormModal({
               <p className="mt-1"><RolePill role={user.role} /></p>
             </div>
             <div>
-              <span className="label-caps">Estado</span>
+              <span className="label-caps">Estado actual</span>
               <p className="mt-1"><StatusPill status={user.status} /></p>
             </div>
           </div>
         ) : null}
         <p className="text-body-sm text-on-surface-variant">
           Nombre, apellido y cargo reflejan al empleado vinculado y se gestionan
-          en Gestión de Personal. Aquí solo puedes cambiar el correo.
+          en Gestión de Personal. El rol se asigna en la creación. Aquí puedes
+          cambiar el correo y el estado.
         </p>
         <FormField id="email" label="Email" error={errors.email?.message} required>
           <input id="email" type="email" className="input" aria-invalid={!!errors.email} {...register("email")} />
         </FormField>
+        <SelectField id="status" label="Estado" error={errors.status?.message} required>
+          <Select id="status" {...register("status")}>
+            <Option value="ACTIVO">Activo</Option>
+            <Option value="INACTIVO">Inactivo</Option>
+          </Select>
+        </SelectField>
       </form>
     </Modal>
   );

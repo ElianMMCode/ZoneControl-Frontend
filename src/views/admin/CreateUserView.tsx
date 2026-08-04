@@ -36,7 +36,7 @@ export function CreateUserView() {
     { size: 100, page: 0 },
   );
   const [selected, setSelected] = useState<EmployeeSearchResponse | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [success, setSuccess] = useState<{ id: string; setupUrl: string } | null>(null);
 
   const {
     register,
@@ -62,14 +62,14 @@ export function CreateUserView() {
   }, [candidates.data, preselectedCode, setValue]);
 
   const onSubmit = handleSubmit(async (values) => {
-    const id = await create({
+    const res = await create({
       employeeCode: values.employeeCode,
       role: values.role,
       status: values.status,
     });
-    if (id) {
+    if (res) {
       toast.success("Usuario creado");
-      setSuccess(id);
+      setSuccess(res);
     } else {
       toast.error(error?.message ?? "No se pudo crear el usuario");
     }
@@ -206,6 +206,11 @@ export function CreateUserView() {
             >
               Crear otro
             </Button>
+            {success?.setupUrl ? (
+              <Button variant="secondary" onClick={() => window.open(success.setupUrl, "_blank", "noopener")}>
+                <Icon name="open_in_new" size="sm" /> Abrir configuración
+              </Button>
+            ) : null}
             <Button onClick={() => navigate("/admin/usuarios")}>
               Ir a Gestión de Usuarios
             </Button>
@@ -218,11 +223,11 @@ export function CreateUserView() {
           </span>
           <p className="text-body-sm text-on-surface">
             Se ha generado un enlace de configuración que expirará en 24 horas.
-            El empleado deberá abrir el enlace desde su correo para definir su
-            contraseña.
+            Como aún no hay envío de correo, usa el botón para abrir la
+            configuración de contraseña en una nueva ventana.
           </p>
           <p className="font-mono text-body-sm text-on-surface-variant">
-            ID: {success}
+            ID: {success?.id}
           </p>
         </div>
       </Modal>

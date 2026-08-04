@@ -21,6 +21,7 @@ export interface CreateUserRequest {
 
 export interface UpdateUserRequest {
   email: string;
+  status: UserStatus;
 }
 
 export interface StatusUpdateRequest {
