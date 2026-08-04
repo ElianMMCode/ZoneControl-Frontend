@@ -19,6 +19,7 @@ import { PermissionsView } from "@/views/personal/PermissionsView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
 import { AccessValidationView } from "@/views/supervisor/AccessValidationView";
 import { ReportsView } from "@/views/supervisor/ReportsView";
+import { ZonesView } from "@/views/supervisor/ZonesView";
 import { RoleMatrixView } from "@/views/admin/RoleMatrixView";
 import { SettingsView } from "@/views/settings/SettingsView";
 import { NotFoundView } from "@/views/NotFoundView";
@@ -175,6 +176,15 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
             <ReportsView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/supervisor/zones",
+        handle: { title: "Zonas en vivo" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
+            <ZonesView />
           </RequireRole>
         ),
       },
