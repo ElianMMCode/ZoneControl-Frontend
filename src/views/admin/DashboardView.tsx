@@ -63,7 +63,7 @@ export function AdminDashboard() {
     <div className="space-y-8">
       <PageHeader
         title="Panel de Administración"
-        subtitle="Resumen general del sistema ZoneControl"
+        subtitle="Resumen general del sistema"
         actions={
           <Button variant="ghost" onClick={refreshAll}>
             <Icon name="refresh" size="sm" /> Actualizar

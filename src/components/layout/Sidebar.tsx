@@ -1,5 +1,8 @@
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import { Icon } from "@/components/ui/Icon";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/cn";
 import type { Role } from "@/types";
 
 type Item = {
@@ -26,27 +29,110 @@ const items: Item[] = [
   { to: "/ajustes", label: "Ajustes", icon: "settings", roles: ["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"] },
 ];
 
+const roleLabel: Record<Role, string> = {
+  ADMIN: "Administrador",
+  GESTOR_PERSONAL: "Gestor de Personal",
+  SUPERVISOR_AUDITOR: "Supervisor / Auditor",
+};
+
+function initialsOf(name?: string): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 export function Sidebar({ role }: { role: Role | null }) {
+  const { user } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
   const visible = items.filter((i) => role && i.roles.includes(role));
+
   return (
-    <aside className="hidden w-70 shrink-0 border-r border-outline-variant bg-surface-container-lowest lg:flex lg:flex-col">
-      <div className="flex h-16 items-center gap-2 border-b border-outline-variant px-5">
-        <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-on-primary">
-          <Icon name="verified_user" size="md" />
-        </span>
-        <div>
-          <p className="text-body-sm font-bold text-on-surface">ZoneControl</p>
-          <p className="label-caps">Laboratorio XYZ</p>
+    <aside
+      className={cn(
+        "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-outline-variant bg-surface-container-lowest transition-[width] duration-200 lg:flex",
+        collapsed ? "w-16" : "w-70",
+      )}
+    >
+      <div className="flex h-16 items-center gap-1 border-b border-outline-variant px-3">
+        <Link
+          to="/"
+          title="Volver al inicio"
+          className={cn(
+            "flex min-w-0 items-center gap-2 rounded-md",
+            collapsed ? "justify-center" : "flex-1 px-2",
+          )}
+        >
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-on-primary">
+            <Icon name="verified_user" size="md" />
+          </span>
+          {!collapsed ? (
+            <span className="min-w-0">
+              <span className="block truncate text-body-sm font-bold text-on-surface">Laboratorio XYZ</span>
+              <span className="label-caps">Sistema de acceso</span>
+            </span>
+          ) : null}
+        </Link>
+        {!collapsed ? (
+          <button
+            type="button"
+            aria-label="Ocultar menú"
+            onClick={() => setCollapsed(true)}
+            className="rounded-md p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <Icon name="menu" size="sm" />
+          </button>
+        ) : null}
+      </div>
+
+      <div className={cn("border-b border-outline-variant py-4", collapsed ? "flex justify-center" : "px-4")}>
+        <div className={cn("flex items-center gap-3", collapsed && "flex-col")}>
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-container text-body-sm font-bold text-on-primary-container">
+            {initialsOf(user?.nombre)}
+          </span>
+          {!collapsed ? (
+            <div className="min-w-0">
+              <p className="truncate text-body-sm font-semibold text-on-surface">{user?.nombre ?? "Usuario"}</p>
+              <p className="truncate text-body-sm text-on-surface-variant">
+                {role ? roleLabel[role] : ""}
+              </p>
+              <p className="truncate text-body-sm text-on-surface-variant">{user?.email ?? ""}</p>
+            </div>
+          ) : null}
         </div>
       </div>
-      <nav aria-label="Navegación principal" className="flex-1 space-y-1 p-3">
-        {visible.map((item) => (
-          <NavLink key={item.to} to={item.to} className="sidebar-link">
-            <Icon name={item.icon} size="sm" />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+
+      <nav aria-label="Navegación principal" className="flex-1 space-y-1 overflow-y-auto p-3">
+        {visible.map((item) =>
+          collapsed ? (
+            <NavLink key={item.to} to={item.to} title={item.label} className="sidebar-link justify-center">
+              <Icon name={item.icon} size="sm" />
+            </NavLink>
+          ) : (
+            <NavLink key={item.to} to={item.to} className="sidebar-link">
+              <Icon name={item.icon} size="sm" />
+              <span>{item.label}</span>
+            </NavLink>
+          ),
+        )}
       </nav>
+
+      {collapsed ? (
+        <div className="border-t border-outline-variant p-3">
+          <button
+            type="button"
+            aria-label="Mostrar menú"
+            onClick={() => setCollapsed(false)}
+            className="flex w-full justify-center rounded-md p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <Icon name="menu_open" size="sm" />
+          </button>
+        </div>
+      ) : null}
     </aside>
   );
 }
