@@ -25,7 +25,7 @@ const items: Item[] = [
   { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/validar", label: "Validar Credencial", icon: "verified_user", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/zones", label: "Zonas", icon: "location_on", roles: ["SUPERVISOR_AUDITOR"] },
-  { to: "/supervisor/reportes", label: "Reportes", icon: "summarize", roles: ["SUPERVISOR_AUDITOR"] },
+  { to: "/supervisor/reportes", label: "Reportes", icon: "summarize", roles: ["ADMIN", "SUPERVISOR_AUDITOR"] },
   { to: "/ajustes", label: "Ajustes", icon: "settings", roles: ["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"] },
 ];
 

@@ -12,6 +12,7 @@ import { userListQuery } from "@/hooks/useUsers";
 import { PendingUsersPanel } from "@/components/domain/PendingUsersPanel";
 import { RecentActivityList } from "@/components/domain/RecentActivityList";
 import { CandidateEmployeesPanel } from "@/components/domain/CandidateEmployeesPanel";
+import { SecurityAlertsPanel } from "@/components/domain/SecurityAlertsPanel";
 import { formatNumber } from "@/lib/format";
 import type {
   AccessHistoryResponse,
@@ -121,6 +122,8 @@ export function AdminDashboard() {
           { label: "Exportar historial", icon: "summarize", to: "/supervisor/reportes" },
         ]}
       />
+
+      <SecurityAlertsPanel />
 
       <CandidateEmployeesPanel
         candidates={candidates.data?.content ?? []}
