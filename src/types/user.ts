@@ -8,6 +8,7 @@ export interface UserResponse {
   role: Role;
   status: UserStatus;
   requirePasswordChange: boolean;
+  pendienteActivacion: boolean;
   employeeCode: string;
   position: string;
 }
@@ -19,11 +20,7 @@ export interface CreateUserRequest {
 }
 
 export interface UpdateUserRequest {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  role?: Role;
-  employeeCode?: string;
+  email: string;
 }
 
 export interface StatusUpdateRequest {

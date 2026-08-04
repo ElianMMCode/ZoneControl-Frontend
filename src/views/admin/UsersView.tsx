@@ -84,9 +84,9 @@ export function UsersView() {
           <Skeleton className="h-28 w-full rounded-lg" />
         ) : (
           <StatCard
-            label="Pendientes de Revisión"
+            label="Pendientes de activación de usuario"
             value={formatNumber(candidates.data?.totalElements ?? 0)}
-            delta="Empleados candidatos a ser usuarios"
+            delta="Empleados sin cuenta de sistema"
             icon="pending_actions"
             tone={candidates.data && candidates.data.totalElements > 0 ? "secondary" : "primary"}
           />
@@ -116,6 +116,8 @@ export function UsersView() {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
           <div className="md:col-span-2">
             <SearchInput
+              id="filter-search"
+              label="Buscar"
               value={search}
               onChange={(v) => {
                 setSearch(v);
@@ -171,7 +173,7 @@ export function UsersView() {
               </thead>
               <tbody>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <TableRowSkeleton key={i} cols={6} />
+                  <TableRowSkeleton key={i} cols={7} />
                 ))}
               </tbody>
             </table>

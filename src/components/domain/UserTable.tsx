@@ -1,6 +1,7 @@
 import { DataTable, type Column } from "@/components/common/DataTable";
 import { StatusPill } from "@/components/common/StatusPill";
 import { RolePill } from "@/components/common/RolePill";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -22,6 +23,16 @@ export function UserTable({
     { key: "email", header: "Email", render: (u) => u.email },
     { key: "role", header: "Rol", render: (u) => <RolePill role={u.role} /> },
     { key: "status", header: "Estado", render: (u) => <StatusPill status={u.status} /> },
+    {
+      key: "activacion",
+      header: "Activación",
+      render: (u) =>
+        u.pendienteActivacion ? (
+          <Badge tone="warning" icon={<Icon name="schedule" size="sm" />}>Pendiente</Badge>
+        ) : (
+          <Badge tone="info" icon={<Icon name="check_circle" size="sm" />}>Completada</Badge>
+        ),
+    },
     { key: "code", header: "Código", render: (u) => <code className="font-mono text-body-sm">{u.employeeCode}</code> },
     {
       key: "actions",
