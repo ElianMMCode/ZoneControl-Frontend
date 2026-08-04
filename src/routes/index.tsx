@@ -17,6 +17,9 @@ import { BulkUploadView } from "@/views/personal/BulkUploadView";
 import { EmployeeDetailView } from "@/views/personal/EmployeeDetailView";
 import { PermissionsView } from "@/views/personal/PermissionsView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
+import { AccessValidationView } from "@/views/supervisor/AccessValidationView";
+import { ReportsView } from "@/views/supervisor/ReportsView";
+import { RoleMatrixView } from "@/views/admin/RoleMatrixView";
 import { SettingsView } from "@/views/settings/SettingsView";
 import { NotFoundView } from "@/views/NotFoundView";
 import type { Role } from "@/types";
@@ -140,11 +143,38 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "/admin/matriz-roles",
+        handle: { title: "Matriz de Roles" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
+            <RoleMatrixView />
+          </RequireRole>
+        ),
+      },
+      {
         path: "/supervisor",
         handle: { title: "Panel de Supervisión" } satisfies RouteHandle,
         element: (
           <RequireRole roles={["SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
             <SupervisorDashboard />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/supervisor/validar",
+        handle: { title: "Validación de Credenciales" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
+            <AccessValidationView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/supervisor/reportes",
+        handle: { title: "Reportes de Auditoría" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
+            <ReportsView />
           </RequireRole>
         ),
       },
