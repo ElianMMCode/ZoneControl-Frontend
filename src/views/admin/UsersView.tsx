@@ -61,6 +61,7 @@ export function UsersView() {
     update,
     updateStatus,
     resetPassword,
+    error,
     loading: mutating,
   } = useUserMutations();
 
@@ -215,7 +216,7 @@ export function UsersView() {
             toast.success("Usuario actualizado");
             data.refresh();
           } else {
-            toast.error("No se pudo actualizar el usuario");
+            toast.error(error?.message ?? "No se pudo actualizar el usuario");
           }
           return ok;
         }}
@@ -250,7 +251,7 @@ export function UsersView() {
             data.refresh();
             setToggling(null);
           } else {
-            toast.error("No se pudo cambiar el estado");
+            toast.error(error?.message ?? "No se pudo cambiar el estado");
           }
         }}
       />
@@ -273,7 +274,7 @@ export function UsersView() {
             toast.success(msg);
             setResetting(null);
           } else {
-            toast.error("No se pudo enviar el enlace");
+            toast.error(error?.message ?? "No se pudo enviar el enlace");
           }
         }}
       />
