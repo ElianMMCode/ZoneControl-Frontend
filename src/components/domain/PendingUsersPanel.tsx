@@ -12,12 +12,14 @@ export function PendingUsersPanel({
   error,
   onRefresh,
   onResolved,
+  currentUserId,
 }: {
   users: UserResponse[];
   loading: boolean;
   error: { message: string } | null;
   onRefresh: () => void;
   onResolved: () => void;
+  currentUserId?: string;
 }) {
   const { resetPassword, loading: resetting } = useUserMutations();
 
@@ -84,9 +86,11 @@ export function PendingUsersPanel({
               </div>
               <div className="flex items-center gap-2">
                 <span className="badge-error">Token pendiente</span>
-                <Button variant="secondary" size="sm" onClick={() => handleResend(u)} loading={resetting}>
-                  <Icon name="send" size="sm" /> Reenviar enlace
-                </Button>
+                {u.id !== currentUserId ? (
+                  <Button variant="secondary" size="sm" onClick={() => handleResend(u)} loading={resetting}>
+                    <Icon name="send" size="sm" /> Reenviar enlace
+                  </Button>
+                ) : null}
               </div>
             </li>
           ))}

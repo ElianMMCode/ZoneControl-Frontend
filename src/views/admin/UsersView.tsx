@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { StatCard } from "@/components/common/StatCard";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { useAuth } from "@/hooks/useAuth";
 import { Select, SelectField, Option } from "@/components/ui/Select";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, TableRowSkeleton } from "@/components/ui/Skeleton";
@@ -26,6 +27,7 @@ import type {
 } from "@/types";
 
 export function UsersView() {
+  const { user: currentUser } = useAuth();
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<Role | "">("");
   const [status, setStatus] = useState<UserStatus | "">("");
@@ -187,6 +189,7 @@ export function UsersView() {
               onEdit={(u) => setEditing(u)}
               onToggleStatus={(u) => setToggling(u)}
               onResetPassword={(u) => setResetting(u)}
+              currentUserId={currentUser?.id}
             />
             <Pagination
               page={data.data.number}

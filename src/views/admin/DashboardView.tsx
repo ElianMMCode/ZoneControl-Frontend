@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { useResource } from "@/hooks/useResource";
+import { useAuth } from "@/hooks/useAuth";
 import { userListQuery } from "@/hooks/useUsers";
 import { PendingUsersPanel } from "@/components/domain/PendingUsersPanel";
 import { RecentActivityList } from "@/components/domain/RecentActivityList";
@@ -29,6 +30,7 @@ function percent(value: number, total: number): number {
 }
 
 export function AdminDashboard() {
+  const { user: currentUser } = useAuth();
   const stats = useResource<AdminStatsResponse>("/api/admin/stats");
 
   const pendingQuery = useMemo(() => userListQuery({ pendientesConfiguracion: true, size: 20 }), []);
@@ -122,6 +124,7 @@ export function AdminDashboard() {
           error={pendingUsers.error ? { message: pendingUsers.error.message } : null}
           onRefresh={pendingUsers.refresh}
           onResolved={pendingUsers.refresh}
+          currentUserId={currentUser?.id}
         />
         <RecentActivityList
           events={history.data?.content ?? []}
