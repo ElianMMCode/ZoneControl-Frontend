@@ -68,8 +68,28 @@ export function AdminAreasView() {
   };
 
   const columns: Column<ProductionArea>[] = [
-    { key: "name", header: "Nombre", render: (a) => <span className="text-body-md">{a.name}</span> },
-    { key: "desc", header: "Descripción", render: (a) => a.description ?? "—" },
+    {
+      key: "name",
+      header: "Nombre",
+      render: (a) => (
+        <span className="flex items-center gap-2 text-body-md">
+          <Icon name="domain" size="sm" className="text-on-surface-variant" />
+          {a.name}
+        </span>
+      ),
+    },
+    {
+      key: "desc",
+      header: "Descripción",
+      render: (a) =>
+        a.description ? (
+          <span className="line-clamp-2 max-w-md text-body-sm text-on-surface-variant" title={a.description}>
+            {a.description}
+          </span>
+        ) : (
+          <span className="text-body-sm text-on-surface-variant/60">Sin descripción</span>
+        ),
+    },
     { key: "actions", header: "", align: "right", render: (a) => (
       <div className="flex items-center justify-end gap-1">
         <Tooltip label="Editar área">
@@ -103,7 +123,13 @@ export function AdminAreasView() {
       ) : areas.error ? (
         <ErrorState message={areas.error.message} onRetry={areas.refresh} />
       ) : areas.data && areas.data.length > 0 ? (
-        <DataTable columns={columns} data={areas.data} rowKey={(a) => a.id} />
+        <section className="card space-y-4">
+          <header className="card-header">
+            <h2 className="text-heading-md">Áreas registradas</h2>
+            <span className="label-caps">{areas.data.length} ÁREAS</span>
+          </header>
+          <DataTable columns={columns} data={areas.data} rowKey={(a) => a.id} />
+        </section>
       ) : (
         <EmptyState title="Sin áreas" description="Aún no se han registrado áreas." icon="domain_disabled" />
       )}
@@ -122,7 +148,7 @@ export function AdminAreasView() {
         }
       >
         <div className="space-y-3">
-          <FormField id="areaName" label="Nombre" required>
+          <FormField id="areaName" label="Nombre" required help="Máximo 30 caracteres. El nombre debe ser único.">
             <input
               id="areaName"
               className="input"
@@ -131,7 +157,7 @@ export function AdminAreasView() {
               maxLength={30}
             />
           </FormField>
-          <FormField id="areaDesc" label="Descripción">
+          <FormField id="areaDesc" label="Descripción" help="Opcional · máximo 200 caracteres">
             <textarea
               id="areaDesc"
               className="input min-h-20"
