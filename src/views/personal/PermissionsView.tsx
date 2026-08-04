@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { DataTable, type Column } from "@/components/common/DataTable";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
 import { Select, Option } from "@/components/ui/Select";
@@ -38,6 +39,8 @@ export function PermissionsView() {
   const [reactivationDate, setReactivationDate] = useState("");
   const [creating, setCreating] = useState(false);
   const [editingPermission, setEditingPermission] = useState<PermissionResponse | null>(null);
+  const [revoking, setRevoking] = useState<PermissionResponse | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   const data = useResource<Page<PermissionResponse>>("/api/permisos", {
     search: search || undefined,
@@ -72,15 +75,18 @@ export function PermissionsView() {
     }
   };
 
-  const onRevoke = async (id: string) => {
-    if (!window.confirm("¿Revocar definitivamente este permiso?")) return;
+  const onRevoke = async (permission: PermissionResponse) => {
+    setRemoving(true);
     try {
-      await revoke(id);
+      await revoke(permission.id);
       data.refresh();
       toast.success("Permiso revocado");
+      setRevoking(null);
     } catch (err) {
       if (isApiError(err)) toast.error(err.message);
       else toast.error("No se pudo revocar");
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -177,7 +183,7 @@ export function PermissionsView() {
               <Icon name="block" size="sm" />
             </Button>
           )}
-          <Button size="sm" variant="ghost" onClick={() => onRevoke(p.id)} title="Revocar">
+          <Button size="sm" variant="ghost" onClick={() => setRevoking(p)} title="Revocar">
             <Icon name="delete" size="sm" />
           </Button>
         </div>
@@ -316,6 +322,21 @@ export function PermissionsView() {
         initial={editingPermission}
         areas={areas.data ?? []}
         areasLoading={areas.loading}
+      />
+
+      <ConfirmDialog
+        open={!!revoking}
+        title="Revocar permiso"
+        message={
+          revoking
+            ? `¿Seguro que deseas revocar definitivamente el permiso de ${revoking.employeeName} para ${revoking.areaName}?`
+            : ""
+        }
+        confirmLabel="Revocar"
+        tone="danger"
+        loading={removing}
+        onCancel={() => setRevoking(null)}
+        onConfirm={() => revoking && onRevoke(revoking)}
       />
     </div>
   );

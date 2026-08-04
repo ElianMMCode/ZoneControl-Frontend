@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { DataTable, type Column } from "@/components/common/DataTable";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
 import { Icon } from "@/components/ui/Icon";
@@ -19,6 +20,8 @@ export function AdminAreasView() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<ProductionArea | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   const openCreate = () => {
     setName("");
@@ -57,13 +60,16 @@ export function AdminAreasView() {
   };
 
   const onDelete = async (area: ProductionArea) => {
-    if (!window.confirm(`¿Eliminar el área "${area.name}"?`)) return;
+    setRemoving(true);
     try {
       await areas.remove(area.id);
       toast.success("Área eliminada");
+      setDeleting(null);
     } catch (err) {
       if (isApiError(err)) toast.error(err.message);
       else toast.error("No se pudo eliminar el área");
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -98,7 +104,7 @@ export function AdminAreasView() {
           </Button>
         </Tooltip>
         <Tooltip label="Eliminar área">
-          <Button size="sm" variant="ghost" onClick={() => onDelete(a)} title="Eliminar">
+          <Button size="sm" variant="ghost" onClick={() => setDeleting(a)} title="Eliminar">
             <Icon name="delete" size="sm" />
           </Button>
         </Tooltip>
@@ -168,6 +174,17 @@ export function AdminAreasView() {
           </FormField>
         </div>
       </Modal>
+
+      <ConfirmDialog
+        open={!!deleting}
+        title="Eliminar área"
+        message={deleting ? `¿Seguro que deseas eliminar el área "${deleting.name}"?` : ""}
+        confirmLabel="Eliminar"
+        tone="danger"
+        loading={removing}
+        onCancel={() => setDeleting(null)}
+        onConfirm={() => deleting && onDelete(deleting)}
+      />
     </div>
   );
 }
