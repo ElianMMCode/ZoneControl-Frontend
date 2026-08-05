@@ -77,6 +77,10 @@ export function ZonesView() {
     });
   }, [stream.validations, filterArea, filterResult]);
 
+  const zoneOccupancy = selectedZone
+    ? stream.occupancy.find((o) => o.area === selectedZone.name)
+    : undefined;
+
   const onToggleEmergency = async (zoneName: string, current: boolean) => {
     setToggling(zoneName);
     try {
@@ -177,20 +181,6 @@ export function ZonesView() {
                     <p className="mt-1 text-body-sm text-on-surface-variant">
                       Aforo: <b className="text-on-surface">{occ?.aforo ?? 0}</b>
                     </p>
-                    {occ && occ.people.length > 0 ? (
-                      <ul className="mt-2 space-y-1">
-                        {occ.people.map((p) => (
-                          <li key={p.employeeCode} className="flex items-center justify-between text-body-sm">
-                            <span>{p.nombre}</span>
-                            <span className="font-mono text-on-surface-variant">
-                              {p.employeeCode} · {formatTime(p.entryTime)}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-body-sm text-on-surface-variant">Sin personas dentro.</p>
-                    )}
                     <div className="mt-3 flex flex-wrap gap-2">
                       <Button size="sm" variant="secondary" onClick={() => setSelectedZone(zone as unknown as ProductionArea)}>
                         <Icon name="badge" size="sm" /> Personal / Autorizaciones
@@ -286,9 +276,26 @@ export function ZonesView() {
         open={!!selectedZone}
         onClose={() => setSelectedZone(null)}
         title={`${selectedZone?.name ?? ""} — Personal y autorizaciones`}
-        description="Empleados con acceso asignado a esta zona y autorizaciones vigentes."
+        description="Empleados con acceso asignado a esta zona, autorizaciones vigentes y ocupación actual."
         size="lg"
       >
+        <div className="mb-4 rounded-lg border border-outline-variant bg-surface-container/40 p-3">
+          <p className="label-caps">Ocupación actual · {zoneOccupancy?.aforo ?? 0} persona(s)</p>
+          {zoneOccupancy && zoneOccupancy.people.length > 0 ? (
+            <ul className="mt-2 space-y-1">
+              {zoneOccupancy.people.map((p) => (
+                <li key={p.employeeCode} className="flex items-center justify-between text-body-sm">
+                  <span>{p.nombre}</span>
+                  <span className="font-mono text-on-surface-variant">
+                    {p.employeeCode} · {formatTime(p.entryTime)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-1 text-body-sm text-on-surface-variant">Sin personas dentro de esta zona.</p>
+          )}
+        </div>
         <Tabs
           items={[
             { id: "empleados", label: "Empleados asignados", icon: "badge" },
