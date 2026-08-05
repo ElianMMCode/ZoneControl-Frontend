@@ -13,11 +13,12 @@ import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useResource } from "@/hooks/useResource";
 import { employeeListQuery } from "@/hooks/useEmployees";
-import { isApiError } from "@/lib/api";
+import { useDepartments } from "@/hooks/useGestor";
 import type { DocumentType, EmployeeSearchResponse, EmployeeStatus, Page } from "@/types";
 
 export function EmployeeListView() {
   const navigate = useNavigate();
+  const departments = useDepartments();
   const [documentType, setDocumentType] = useState<DocumentType | "">("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -160,7 +161,12 @@ export function EmployeeListView() {
             <input id="lastName" className="input" value={lastName} onChange={(e) => setLastName(e.target.value)} />
           </FormField>
           <FormField id="dept" label="Departamento">
-            <input id="dept" className="input" value={departmentName} onChange={(e) => setDepartmentName(e.target.value)} placeholder="Control de Calidad" />
+            <Select id="dept" value={departmentName} onChange={(e) => setDepartmentName(e.target.value)} disabled={departments.loading}>
+              <Option value="">Todos</Option>
+              {departments.data?.map((d) => (
+                <Option key={d} value={d}>{d}</Option>
+              ))}
+            </Select>
           </FormField>
         </div>
         <div className="flex justify-end">
@@ -170,13 +176,7 @@ export function EmployeeListView() {
         </div>
       </section>
 
-      {data.error && isApiError(data.error) && data.error.status === 400 ? (
-        <EmptyState
-          title="Selecciona al menos un filtro"
-          description="La búsqueda de personal requiere al menos un criterio para evitar listar todo el directorio."
-          icon="filter_alt"
-        />
-      ) : data.loading ? (
+      {data.loading ? (
         <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
       ) : data.error ? (
         <ErrorState message={data.error.message} onRetry={data.refresh} />

@@ -64,13 +64,21 @@ export function EmployeeDetailView() {
   const [assigningArea, setAssigningArea] = useState(false);
   const [editingPermission, setEditingPermission] = useState<PermissionResponse | null>(null);
   const [revoking, setRevoking] = useState<PermissionResponse | null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<PermissionResponse | null>(null);
+  const [reactivationDate, setReactivationDate] = useState("");
   const [showFullHistory, setShowFullHistory] = useState(false);
 
   const employee = useResource<EmployeeSearchResponse>(id ? `/api/personal/${id}` : null, undefined, [id]);
   const permissions = useEmployeePermissions(id ?? null);
   const history = useEmployeeAccessHistory(id ?? null, 20);
   const { uploadPhoto, deletePhoto, update } = useEmployeeMutations();
-  const { create: createPermission, update: updatePermission, revoke: revokePermission } = usePermissionMutations();
+  const {
+    create: createPermission,
+    update: updatePermission,
+    revoke: revokePermission,
+    suspend: suspendPermission,
+    reactivate: reactivatePermission,
+  } = usePermissionMutations();
   const areas = useAreas();
 
   const photoUrl = employee.data?.photoUrl
@@ -150,6 +158,7 @@ export function EmployeeDetailView() {
         expirationDate: values.expirationDate,
         startTime: values.startTime,
         endTime: values.endTime,
+        schedules: values.schedules,
       });
       toast.success("Permiso actualizado");
       permissions.refresh();
@@ -171,6 +180,34 @@ export function EmployeeDetailView() {
     } catch (err) {
       if (isApiError(err)) toast.error(err.message);
       else toast.error("No se pudo revocar el permiso");
+    }
+  };
+
+  const onSuspendPermission = async () => {
+    if (!suspendTarget || !reactivationDate) {
+      toast.error("Selecciona la fecha de reactivación");
+      return;
+    }
+    try {
+      await suspendPermission(suspendTarget.id, reactivationDate);
+      toast.success("Permiso suspendido");
+      setSuspendTarget(null);
+      setReactivationDate("");
+      permissions.refresh();
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo suspender el permiso");
+    }
+  };
+
+  const onReactivatePermission = async (permission: PermissionResponse) => {
+    try {
+      await reactivatePermission(permission.id);
+      toast.success("Permiso reactivado");
+      permissions.refresh();
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo reactivar el permiso");
     }
   };
 
@@ -310,15 +347,39 @@ export function EmployeeDetailView() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 sm:justify-end">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setEditingPermission(p)}
-                    title="Editar permiso"
-                    disabled={p.status === "SUSPENDIDO"}
-                  >
-                    <Icon name="edit" size="sm" />
-                  </Button>
+                  {p.status === "SUSPENDIDO" && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => onReactivatePermission(p)}
+                      title="Reactivar permiso"
+                    >
+                      <Icon name="lock_open" size="sm" />
+                    </Button>
+                  )}
+                  {p.status === "ACTIVO" && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setEditingPermission(p)}
+                      title="Editar permiso"
+                    >
+                      <Icon name="edit" size="sm" />
+                    </Button>
+                  )}
+                  {p.status === "ACTIVO" && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        setSuspendTarget(p);
+                        setReactivationDate("");
+                      }}
+                      title="Suspender permiso"
+                    >
+                      <Icon name="block" size="sm" />
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" onClick={() => setRevoking(p)} title="Revocar permiso">
                     <Icon name="delete" size="sm" />
                   </Button>
@@ -378,6 +439,32 @@ export function EmployeeDetailView() {
         areas={areas.data ?? []}
         areasLoading={areas.loading}
       />
+
+      <Modal
+        open={suspendTarget !== null}
+        onClose={() => setSuspendTarget(null)}
+        title="Suspender permiso"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setSuspendTarget(null)}>Cancelar</Button>
+            <Button onClick={onSuspendPermission}><Icon name="block" size="sm" /> Suspender</Button>
+          </>
+        }
+      >
+        <p className="text-body-md">
+          Vas a suspender el permiso de <b>{suspendTarget?.employeeName}</b> para el área <b>{suspendTarget?.areaName}</b>.
+        </p>
+        <FormField id="reactivationDate" label="Fecha de reactivación" required>
+          <input
+            id="reactivationDate"
+            type="date"
+            className="input"
+            value={reactivationDate}
+            onChange={(e) => setReactivationDate(e.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
+          />
+        </FormField>
+      </Modal>
 
       <ConfirmDialog
         open={!!revoking}

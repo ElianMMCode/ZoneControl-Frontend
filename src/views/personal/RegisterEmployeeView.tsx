@@ -40,6 +40,7 @@ export function RegisterEmployeeView() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const departments = useDepartments();
@@ -59,13 +60,36 @@ export function RegisterEmployeeView() {
     reader.readAsDataURL(file);
   };
 
+  const validate = (): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    if (!form.documentNumber.trim()) {
+      errs.documentNumber = "El número de documento es obligatorio";
+    }
+    if (form.firstName.trim().length < 2) {
+      errs.firstName = "Los nombres deben tener al menos 2 caracteres";
+    }
+    if (form.lastName.trim().length < 2) {
+      errs.lastName = "Los apellidos deben tener al menos 2 caracteres";
+    }
+    if (!form.position.trim()) {
+      errs.position = "El cargo es obligatorio";
+    }
+    if (!form.departmentName) {
+      errs.departmentName = "El departamento es obligatorio";
+    }
+    return errs;
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
-    if (!form.firstName || !form.lastName || !form.position || !form.departmentName) {
-      toast.error("Completa los campos obligatorios");
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      toast.error("Revisa los campos marcados");
       return;
     }
+    setFieldErrors({});
     setSubmitting(true);
     try {
       const created = await register({
@@ -133,52 +157,53 @@ export function RegisterEmployeeView() {
                 <Option value="RC">RC</Option>
               </Select>
             </FormField>
-            <FormField id="documentNumber" label="Nº documento" required>
+            <FormField id="documentNumber" label="Nº documento" error={fieldErrors.documentNumber} required>
               <input
                 id="documentNumber"
                 className="input"
                 value={form.documentNumber}
                 onChange={(e) => onChange("documentNumber", e.target.value)}
                 maxLength={20}
-                required
+                aria-invalid={!!fieldErrors.documentNumber}
               />
             </FormField>
-            <FormField id="firstName" label="Nombres" required>
+            <FormField id="firstName" label="Nombres" error={fieldErrors.firstName} required>
               <input
                 id="firstName"
                 className="input"
                 value={form.firstName}
                 onChange={(e) => onChange("firstName", e.target.value)}
                 maxLength={35}
-                required
+                aria-invalid={!!fieldErrors.firstName}
               />
             </FormField>
-            <FormField id="lastName" label="Apellidos" required>
+            <FormField id="lastName" label="Apellidos" error={fieldErrors.lastName} required>
               <input
                 id="lastName"
                 className="input"
                 value={form.lastName}
                 onChange={(e) => onChange("lastName", e.target.value)}
                 maxLength={35}
-                required
+                aria-invalid={!!fieldErrors.lastName}
               />
             </FormField>
-            <FormField id="position" label="Cargo" required>
+            <FormField id="position" label="Cargo" error={fieldErrors.position} required>
               <input
                 id="position"
                 className="input"
                 value={form.position}
                 onChange={(e) => onChange("position", e.target.value)}
                 maxLength={30}
-                required
+                aria-invalid={!!fieldErrors.position}
               />
             </FormField>
-            <FormField id="departmentName" label="Departamento" required>
+            <FormField id="departmentName" label="Departamento" error={fieldErrors.departmentName} required>
               <Select
                 id="departmentName"
                 value={form.departmentName}
                 onChange={(e) => onChange("departmentName", e.target.value)}
                 disabled={departments.loading}
+                aria-invalid={!!fieldErrors.departmentName}
               >
                 <Option value="">Seleccione…</Option>
                 {departments.data?.map((d) => (

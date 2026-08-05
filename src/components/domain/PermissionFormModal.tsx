@@ -100,11 +100,10 @@ export function PermissionFormModal({
 
   useEffect(() => {
     if (!open) return;
-    if (initial && initial.schedules && initial.schedules.length > 0) {
-      setSelectedDays(initial.schedules.map((s) => s.dayOfWeek));
-    } else {
-      setSelectedDays(ALL_DAYS);
-    }
+    const daysFromSchedules = initial?.schedules?.length
+      ? initial.schedules.map((s) => s.dayOfWeek)
+      : null;
+    setSelectedDays(daysFromSchedules ?? ALL_DAYS);
     if (initial) {
       reset({
         employeeCode: initial.employeeCode,

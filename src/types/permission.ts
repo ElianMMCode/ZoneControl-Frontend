@@ -20,11 +20,11 @@ export interface PermissionResponse {
   status: PermissionStatus;
   startDate: string;
   expirationDate: string;
-  reactivationDate: string | null;
-  startTime: string;
-  endTime: string;
-  schedules: AreaSchedule[];
-}
+   reactivationDate: string | null;
+   startTime: string;
+   endTime: string;
+   schedules: AreaSchedule[];
+ }
 
 export interface CreatePermissionRequest {
   employeeCode: string;
