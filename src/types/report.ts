@@ -10,7 +10,17 @@ export interface PeriodicReportRequest {
 
 export interface PeriodicReportPreviewRow {
   department: string;
-  periodo: string;
+  area: string;
+  total: number;
+  autorizados: number;
+  denegados: number;
+  noRegistrados: number;
+  suspendidos: number;
+  pctAutorizados: number;
+}
+
+export interface PeriodicReportPreviewDayRow {
+  dia: string;
   total: number;
   autorizados: number;
   denegados: number;
@@ -24,5 +34,6 @@ export interface PeriodicReportPreviewResponse {
   formato: ReportFormat;
   departmentNames: string[] | null;
   generatedAt: string;
-  rows: PeriodicReportPreviewRow[];
+  areaRows: PeriodicReportPreviewRow[];
+  dayRows: PeriodicReportPreviewDayRow[];
 }

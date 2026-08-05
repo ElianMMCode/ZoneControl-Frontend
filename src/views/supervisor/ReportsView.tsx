@@ -401,21 +401,36 @@ export function ReportsView() {
                 Departamentos: {preview.departmentNames.join(", ")}
               </p>
             ) : null}
+            <p className="label-caps">Resumen por departamento × área</p>
             <DataTable
               columns={[
                 { key: "dept", header: "Departamento", render: (r) => r.department },
-                { key: "periodo", header: "Período", render: (r) => r.periodo },
+                { key: "area", header: "Área", render: (r) => r.area },
+                { key: "total", header: "Total", render: (r) => formatNumber(r.total) },
+                { key: "aut", header: "Autorizados", render: (r) => formatNumber(r.autorizados) },
+                { key: "den", header: "Denegados", render: (r) => formatNumber(r.denegados) },
+                { key: "noreg", header: "No registrados", render: (r) => formatNumber(r.noRegistrados) },
+                { key: "susp", header: "Suspendidos", render: (r) => formatNumber(r.suspendidos) },
+                { key: "pct", header: "% Autorizados", render: (r) => `${r.pctAutorizados}%` },
+              ]}
+              data={preview.areaRows}
+              rowKey={(r) => `${r.department}-${r.area}`}
+            />
+            <p className="label-caps">Distribución por día</p>
+            <DataTable
+              columns={[
+                { key: "dia", header: "Día", render: (r) => r.dia },
                 { key: "total", header: "Total", render: (r) => formatNumber(r.total) },
                 { key: "aut", header: "Autorizados", render: (r) => formatNumber(r.autorizados) },
                 { key: "den", header: "Denegados", render: (r) => formatNumber(r.denegados) },
                 { key: "noreg", header: "No registrados", render: (r) => formatNumber(r.noRegistrados) },
                 { key: "susp", header: "Suspendidos", render: (r) => formatNumber(r.suspendidos) },
               ]}
-              data={preview.rows}
-              rowKey={(r) => r.department}
+              data={preview.dayRows}
+              rowKey={(r) => r.dia}
             />
             <p className="text-body-sm text-on-surface-variant">
-              Generado el {formatDateTime(preview.generatedAt)}. Esto es lo que recibiría el socio internacional; descarga el archivo para adjuntarlo.
+              Generado el {formatDateTime(preview.generatedAt)}. Agregación sin datos personales; esto es lo que recibiría el socio internacional. Descarga el archivo para adjuntarlo.
             </p>
           </div>
         ) : null}
