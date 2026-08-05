@@ -13,7 +13,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Pagination } from "@/components/common/Pagination";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useDepartments } from "@/hooks/useGestor";
+import { useDepartments, useAreas } from "@/hooks/useGestor";
 import { useResource } from "@/hooks/useResource";
 import { apiDownload, apiFetch, isApiError } from "@/lib/api";
 import { formatDateTime, formatNumber } from "@/lib/format";
@@ -44,6 +44,7 @@ export function ReportsView() {
   const [fechaFin, setFechaFin] = useState(iso(today));
   const [employeeCode, setEmployeeCode] = useState("");
   const [department, setDepartment] = useState("");
+  const [area, setArea] = useState("");
   const [resultado, setResultado] = useState<AccessResult | "">("");
   const [page, setPage] = useState(0);
   const [exporting, setExporting] = useState<ReportFormat | null>(null);
@@ -61,6 +62,7 @@ export function ReportsView() {
   const [previewDownloading, setPreviewDownloading] = useState(false);
 
   const departments = useDepartments();
+  const areas = useAreas();
 
   const periodicBody = () => ({
     mes,
@@ -142,16 +144,18 @@ export function ReportsView() {
     fechaFin,
     employeeCode: employeeCode || undefined,
     department: department || undefined,
+    productionAreaName: area || undefined,
     resultado: resultado || undefined,
     page,
     size: 10,
-  }, [fechaInicio, fechaFin, employeeCode, department, resultado, page]);
+  }, [fechaInicio, fechaFin, employeeCode, department, area, resultado, page]);
 
   const exportFilters = {
     fechaInicio,
     fechaFin,
     employeeCode: employeeCode || undefined,
     departamentoName: department || undefined,
+    productionAreaName: area || undefined,
     resultado: resultado || undefined,
   };
 
@@ -221,7 +225,7 @@ export function ReportsView() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <FormField id="fechaInicio" label="Fecha inicio" required>
             <input id="fechaInicio" type="date" className="input" value={fechaInicio} onChange={(e) => { setFechaInicio(e.target.value); setPage(0); }} />
           </FormField>
@@ -240,6 +244,20 @@ export function ReportsView() {
                   <Option value="">Todos</Option>
                   {departments.data?.map((d) => (
                     <Option key={d} value={d}>{d}</Option>
+                  ))}
+                </>
+              )}
+            </Select>
+          </FormField>
+          <FormField id="area" label="Área">
+            <Select id="area" value={area} onChange={(e) => { setArea(e.target.value); setPage(0); }} disabled={areas.loading}>
+              {areas.loading ? (
+                <Option value="">Cargando…</Option>
+              ) : (
+                <>
+                  <Option value="">Todas</Option>
+                  {areas.data?.map((a) => (
+                    <Option key={a.id} value={a.name}>{a.name}</Option>
                   ))}
                 </>
               )}

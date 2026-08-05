@@ -115,11 +115,11 @@ export function Sidebar({ role }: { role: Role | null }) {
       <nav aria-label="Navegación principal" className="flex-1 space-y-1 overflow-y-auto p-3">
         {visible.map((item) =>
           collapsed ? (
-            <NavLink key={item.to} to={item.to} title={item.label} className="sidebar-link justify-center">
+            <NavLink key={item.to} to={item.to} end={item.to.endsWith("dashboard") || item.to === "/supervisor"} title={item.label} className="sidebar-link justify-center">
               <Icon name={item.icon} size="sm" />
             </NavLink>
           ) : (
-            <NavLink key={item.to} to={item.to} className="sidebar-link">
+            <NavLink key={item.to} to={item.to} end={item.to.endsWith("dashboard") || item.to === "/supervisor"} className="sidebar-link">
               <Icon name={item.icon} size="sm" />
               <span>{item.label}</span>
             </NavLink>
