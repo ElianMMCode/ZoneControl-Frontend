@@ -24,7 +24,8 @@ export function SupervisorDashboard() {
 
   const columns: Column<AccessHistoryResponse>[] = [
     { key: "ts", header: "Fecha", render: (h) => formatDateTime(h.timestamp) },
-    { key: "emp", header: "Empleado", render: (h) => h.employeeName ?? h.employeeCode ?? "—" },
+    { key: "code", header: "Código", render: (h) => h.employeeCode ?? "—" },
+    { key: "emp", header: "Empleado", render: (h) => h.employeeName ?? "—" },
     { key: "area", header: "Área", render: (h) => h.productionAreaName },
     { key: "dept", header: "Departamento", render: (h) => h.department },
     { key: "result", header: "Resultado", render: (h) => <StatusPill status={h.result} /> },
@@ -66,8 +67,8 @@ export function SupervisorDashboard() {
         {history.loading ? (
           <div className="overflow-x-auto rounded-lg border border-outline-variant">
             <table className="data-table">
-              <thead><tr><th>Fecha</th><th>Empleado</th><th>Área</th><th>Departamento</th><th>Resultado</th></tr></thead>
-              <tbody>{Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={5} />)}</tbody>
+              <thead><tr><th>Fecha</th><th>Código</th><th>Empleado</th><th>Área</th><th>Departamento</th><th>Resultado</th></tr></thead>
+              <tbody>{Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={6} />)}</tbody>
             </table>
           </div>
         ) : history.error ? (

@@ -6,16 +6,9 @@ import { FormField } from "@/components/ui/Input";
 import { Select, Option } from "@/components/ui/Select";
 import { Icon } from "@/components/ui/Icon";
 import { Badge } from "@/components/ui/Badge";
+import { useAreas } from "@/hooks/useGestor";
 import { apiFetch, isApiError } from "@/lib/api";
 import type { AccessResult, ValidateAccessResponse } from "@/types";
-
-const AREAS = [
-  "Sala Blanca A",
-  "Sala Blanca B",
-  "Laboratorio QC",
-  "Almacén Controlado",
-  "Zona de Empaque",
-];
 
 const RESULT_STYLE: Record<
   AccessResult,
@@ -29,14 +22,19 @@ const RESULT_STYLE: Record<
 
 export function AccessValidationView() {
   const [employeeCode, setEmployeeCode] = useState("");
-  const [area, setArea] = useState(AREAS[0]);
+  const [area, setArea] = useState("");
   const [validating, setValidating] = useState(false);
   const [result, setResult] = useState<ValidateAccessResponse | null>(null);
+  const areas = useAreas();
 
   const onValidate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!employeeCode.trim()) {
       toast.error("Ingresa el código del empleado");
+      return;
+    }
+    if (!area) {
+      toast.error("Selecciona una zona de acceso");
       return;
     }
     setValidating(true);
@@ -81,13 +79,22 @@ export function AccessValidationView() {
               />
             </FormField>
             <FormField id="area" label="Zona de acceso" required>
-              <Select id="area" value={area} onChange={(e) => setArea(e.target.value)}>
-                {AREAS.map((a) => (
-                  <Option key={a} value={a}>{a}</Option>
-                ))}
+              <Select id="area" value={area} onChange={(e) => setArea(e.target.value)} disabled={areas.loading} required>
+                {areas.loading ? (
+                  <Option value="">Cargando áreas…</Option>
+                ) : !areas.data || areas.data.length === 0 ? (
+                  <Option value="">No hay áreas disponibles</Option>
+                ) : (
+                  <>
+                    <Option value="">Selecciona una zona</Option>
+                    {areas.data.map((a) => (
+                      <Option key={a.id} value={a.name}>{a.name}</Option>
+                    ))}
+                  </>
+                )}
               </Select>
             </FormField>
-            <Button type="submit" size="lg" loading={validating} className="w-full">
+            <Button type="submit" size="lg" loading={validating || areas.loading} className="w-full">
               {validating ? <Spinner /> : <Icon name="verified_user" size="sm" />} Validar acceso
             </Button>
           </form>

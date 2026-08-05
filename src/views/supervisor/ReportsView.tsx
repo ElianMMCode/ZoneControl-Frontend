@@ -9,13 +9,22 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/Input";
 import { Select, Option } from "@/components/ui/Select";
 import { Icon } from "@/components/ui/Icon";
+import { Modal } from "@/components/ui/Modal";
 import { Pagination } from "@/components/common/Pagination";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useDepartments } from "@/hooks/useGestor";
 import { useResource } from "@/hooks/useResource";
-import { apiDownload, isApiError } from "@/lib/api";
+import { apiDownload, apiFetch, isApiError } from "@/lib/api";
 import { formatDateTime, formatNumber } from "@/lib/format";
-import type { AccessHistoryResponse, AccessResult, Page, ReportFormat, SupervisorStatsResponse } from "@/types";
+import type {
+  AccessHistoryResponse,
+  AccessResult,
+  Page,
+  PeriodicReportPreviewResponse,
+  ReportFormat,
+  SupervisorStatsResponse,
+} from "@/types";
 
 const today = new Date();
 const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -43,6 +52,89 @@ export function ReportsView() {
   const [mes, setMes] = useState(today.getMonth() + 1);
   const [anio, setAnio] = useState(today.getFullYear());
   const [formatoPeriodico, setFormatoPeriodico] = useState<ReportFormat>("CSV");
+  const [deptosPeriodico, setDeptosPeriodico] = useState<string[]>([]);
+
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<PeriodicReportPreviewResponse | null>(null);
+  const [previewDownloading, setPreviewDownloading] = useState(false);
+
+  const departments = useDepartments();
+
+  const periodicBody = () => ({
+    mes,
+    anio,
+    formato: formatoPeriodico,
+    departmentNames: deptosPeriodico.length > 0 ? deptosPeriodico : undefined,
+  });
+
+  const onExportPeriodic = async () => {
+    setExportingPeriodic(true);
+    try {
+      const { blob, filename } = await apiDownload("/api/reportes/archivo-periodico", {
+        method: "POST",
+        body: periodicBody(),
+      });
+      const ext = formatoPeriodico === "CSV" ? "csv" : formatoPeriodico === "EXCEL" ? "xlsx" : "pdf";
+      downloadBlob(blob, filename ?? `archivo_periodico_${mes}_${anio}.${ext}`);
+      toast.success(`Archivo periódico generado (${formatoPeriodico})`);
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo generar el archivo periódico");
+    } finally {
+      setExportingPeriodic(false);
+    }
+  };
+
+  const onOpenPreview = async () => {
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    setPreview(null);
+    try {
+      const res = await apiFetch<PeriodicReportPreviewResponse>("/api/reportes/archivo-periodico/preview", {
+        method: "POST",
+        body: periodicBody(),
+      });
+      setPreview(res);
+    } catch (err) {
+      if (isApiError(err)) setPreviewError(err.message);
+      else setPreviewError("No se pudo generar la vista previa");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const onDownloadFromPreview = async () => {
+    if (!preview) return;
+    setPreviewDownloading(true);
+    try {
+      const { blob, filename } = await apiDownload("/api/reportes/archivo-periodico", {
+        method: "POST",
+        body: {
+          mes: preview.mes,
+          anio: preview.anio,
+          formato: preview.formato,
+          departmentNames: preview.departmentNames ?? undefined,
+        },
+      });
+      const ext = preview.formato === "CSV" ? "csv" : preview.formato === "EXCEL" ? "xlsx" : "pdf";
+      downloadBlob(blob, filename ?? `archivo_periodico_${preview.mes}_${preview.anio}.${ext}`);
+      toast.success(`Archivo descargado (${preview.formato})`);
+    } catch (err) {
+      if (isApiError(err)) toast.error(err.message);
+      else toast.error("No se pudo descargar el archivo");
+    } finally {
+      setPreviewDownloading(false);
+    }
+  };
+
+  const toggleDepto = (name: string) => {
+    setDeptosPeriodico((prev) =>
+      prev.includes(name) ? prev.filter((d) => d !== name) : [...prev, name],
+    );
+  };
 
   const stats = useResource<SupervisorStatsResponse>("/api/historial/stats");
   const history = useResource<Page<AccessHistoryResponse>>("/api/historial", {
@@ -81,27 +173,10 @@ export function ReportsView() {
     }
   };
 
-  const onExportPeriodic = async () => {
-    setExportingPeriodic(true);
-    try {
-      const { blob, filename } = await apiDownload("/api/reportes/archivo-periodico", {
-        method: "POST",
-        body: { mes, anio, formato: formatoPeriodico },
-      });
-      const ext = formatoPeriodico === "CSV" ? "csv" : formatoPeriodico === "EXCEL" ? "xlsx" : "pdf";
-      downloadBlob(blob, filename ?? `archivo_periodico_${mes}_${anio}.${ext}`);
-      toast.success(`Archivo periódico generado (${formatoPeriodico})`);
-    } catch (err) {
-      if (isApiError(err)) toast.error(err.message);
-      else toast.error("No se pudo generar el archivo periódico");
-    } finally {
-      setExportingPeriodic(false);
-    }
-  };
-
   const columns: Column<AccessHistoryResponse>[] = [
     { key: "ts", header: "Fecha", render: (h) => formatDateTime(h.timestamp) },
-    { key: "emp", header: "Empleado", render: (h) => h.employeeName ?? h.employeeCode ?? "—" },
+    { key: "code", header: "Código", render: (h) => h.employeeCode ?? "—" },
+    { key: "emp", header: "Empleado", render: (h) => h.employeeName ?? "—" },
     { key: "area", header: "Área", render: (h) => h.productionAreaName },
     { key: "dept", header: "Departamento", render: (h) => h.department },
     { key: "result", header: "Resultado", render: (h) => <StatusPill status={h.result} /> },
@@ -157,7 +232,18 @@ export function ReportsView() {
             <input id="employeeCode" className="input font-mono" value={employeeCode} onChange={(e) => { setEmployeeCode(e.target.value); setPage(0); }} placeholder="EMP-000001" />
           </FormField>
           <FormField id="department" label="Departamento">
-            <input id="department" className="input" value={department} onChange={(e) => { setDepartment(e.target.value); setPage(0); }} placeholder="Control de Calidad" />
+            <Select id="department" value={department} onChange={(e) => { setDepartment(e.target.value); setPage(0); }} disabled={departments.loading}>
+              {departments.loading ? (
+                <Option value="">Cargando…</Option>
+              ) : (
+                <>
+                  <Option value="">Todos</Option>
+                  {departments.data?.map((d) => (
+                    <Option key={d} value={d}>{d}</Option>
+                  ))}
+                </>
+              )}
+            </Select>
           </FormField>
           <FormField id="resultado" label="Resultado">
             <Select id="resultado" value={resultado} onChange={(e) => { setResultado(e.target.value as AccessResult | ""); setPage(0); }}>
@@ -214,13 +300,107 @@ export function ReportsView() {
               <Option value="PDF">PDF</Option>
             </Select>
           </FormField>
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <Button onClick={onExportPeriodic} loading={exportingPeriodic} disabled={!mes || !anio}>
               <Icon name="download" size="sm" /> Generar archivo
             </Button>
+            <Button variant="secondary" onClick={onOpenPreview} loading={previewLoading} disabled={!mes || !anio}>
+              <Icon name="send" size="sm" /> Enviar a socio internacional
+            </Button>
           </div>
         </div>
+
+        <fieldset>
+          <legend className="field-label">Departamentos incluidos</legend>
+          {departments.loading ? (
+            <p className="text-body-sm text-on-surface-variant">Cargando departamentos…</p>
+          ) : (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {departments.data?.map((d) => {
+                const selected = deptosPeriodico.includes(d);
+                return (
+                  <label
+                    key={d}
+                    className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-body-sm transition-colors ${
+                      selected
+                        ? "border-primary bg-primary-container/40 text-primary"
+                        : "border-outline-variant text-on-surface-variant hover:border-primary/40"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-3.5 accent-primary"
+                      checked={selected}
+                      onChange={() => toggleDepto(d)}
+                    />
+                    {d}
+                  </label>
+                );
+              })}
+              <button
+                type="button"
+                className="text-body-sm font-medium text-primary hover:underline"
+                onClick={() => setDeptosPeriodico([])}
+              >
+                Limpiar selección
+              </button>
+            </div>
+          )}
+          <p className="mt-1 text-body-sm text-on-surface-variant">
+            Sin selección se incluyen todos los departamentos. El archivo agrega por departamento sin datos personales.
+          </p>
+        </fieldset>
       </section>
+
+      <Modal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title="Vista previa del archivo periódico"
+        description={preview ? `Período ${preview.mes}/${preview.anio} · Formato ${preview.formato}` : "Agregación por departamento sin datos personales"}
+        size="lg"
+        footer={
+          preview ? (
+            <>
+              <Button variant="secondary" onClick={() => setPreviewOpen(false)}>Cerrar</Button>
+              <Button onClick={onDownloadFromPreview} loading={previewDownloading}>
+                <Icon name="download" size="sm" /> Descargar archivo
+              </Button>
+            </>
+          ) : (
+            <Button variant="secondary" onClick={() => setPreviewOpen(false)}>Cerrar</Button>
+          )
+        }
+      >
+        {previewLoading ? (
+          <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
+        ) : previewError ? (
+          <ErrorState message={previewError} onRetry={onOpenPreview} />
+        ) : preview ? (
+          <div className="space-y-4">
+            {preview.departmentNames?.length ? (
+              <p className="text-body-sm text-on-surface-variant">
+                Departamentos: {preview.departmentNames.join(", ")}
+              </p>
+            ) : null}
+            <DataTable
+              columns={[
+                { key: "dept", header: "Departamento", render: (r) => r.department },
+                { key: "periodo", header: "Período", render: (r) => r.periodo },
+                { key: "total", header: "Total", render: (r) => formatNumber(r.total) },
+                { key: "aut", header: "Autorizados", render: (r) => formatNumber(r.autorizados) },
+                { key: "den", header: "Denegados", render: (r) => formatNumber(r.denegados) },
+                { key: "noreg", header: "No registrados", render: (r) => formatNumber(r.noRegistrados) },
+                { key: "susp", header: "Suspendidos", render: (r) => formatNumber(r.suspendidos) },
+              ]}
+              data={preview.rows}
+              rowKey={(r) => r.department}
+            />
+            <p className="text-body-sm text-on-surface-variant">
+              Generado el {formatDateTime(preview.generatedAt)}. Esto es lo que recibiría el socio internacional; descarga el archivo para adjuntarlo.
+            </p>
+          </div>
+        ) : null}
+      </Modal>
     </div>
   );
 }
