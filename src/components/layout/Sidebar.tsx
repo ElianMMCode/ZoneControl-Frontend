@@ -10,19 +10,20 @@ type Item = {
   label: string;
   icon: string;
   roles: ReadonlyArray<Role>;
+  end?: boolean;
 };
 
 const items: Item[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: "dashboard", roles: ["ADMIN"] },
-  { to: "/admin/usuarios", label: "Usuarios", icon: "group", roles: ["ADMIN"] },
+  { to: "/admin/usuarios", label: "Usuarios", icon: "group", roles: ["ADMIN"], end: true },
   { to: "/admin/matriz-roles", label: "Roles", icon: "verified_user", roles: ["ADMIN"] },
   { to: "/admin/areas", label: "Áreas", icon: "domain", roles: ["ADMIN"] },
   { to: "/admin/contenido-publico", label: "Contenido Público", icon: "public", roles: ["ADMIN"] },
-  { to: "/personal", label: "Gestión Personal", icon: "badge", roles: ["GESTOR_PERSONAL"] },
+  { to: "/personal", label: "Gestión Personal", icon: "badge", roles: ["GESTOR_PERSONAL"], end: true },
   { to: "/personal/nuevo", label: "Registrar Personal", icon: "person_add", roles: ["GESTOR_PERSONAL"] },
   { to: "/personal/carga-masiva", label: "Carga Masiva", icon: "upload_file", roles: ["GESTOR_PERSONAL"] },
   { to: "/permisos", label: "Permisos", icon: "vpn_key", roles: ["GESTOR_PERSONAL"] },
-  { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"] },
+  { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"], end: true },
   { to: "/supervisor/validar", label: "Validar Credencial", icon: "verified_user", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/zones", label: "Zonas", icon: "location_on", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/reportes", label: "Reportes", icon: "summarize", roles: ["ADMIN", "SUPERVISOR_AUDITOR"] },
@@ -115,11 +116,11 @@ export function Sidebar({ role }: { role: Role | null }) {
       <nav aria-label="Navegación principal" className="flex-1 space-y-1 overflow-y-auto p-3">
         {visible.map((item) =>
           collapsed ? (
-            <NavLink key={item.to} to={item.to} title={item.label} className="sidebar-link justify-center">
+            <NavLink key={item.to} to={item.to} end={item.end} title={item.label} className="sidebar-link justify-center">
               <Icon name={item.icon} size="sm" />
             </NavLink>
           ) : (
-            <NavLink key={item.to} to={item.to} className="sidebar-link">
+            <NavLink key={item.to} to={item.to} end={item.end} className="sidebar-link">
               <Icon name={item.icon} size="sm" />
               <span>{item.label}</span>
             </NavLink>
