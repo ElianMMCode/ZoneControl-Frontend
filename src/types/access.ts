@@ -46,7 +46,7 @@ export interface AreaOccupancy {
 
 export interface AccessAlertDto {
   id: string;
-  tipo: "DENEGACIONES_REPETIDAS" | "ZONA_EMERGENCIA" | "ACCESO_FUERA_HORARIO";
+  tipo: "DENEGACIONES_REPETIDAS" | "ZONA_EMERGENCIA";
   severidad: "LOW" | "MEDIUM" | "HIGH";
   employeeCode: string | null;
   productionAreaName: string | null;

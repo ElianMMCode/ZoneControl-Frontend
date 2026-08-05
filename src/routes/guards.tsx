@@ -28,6 +28,6 @@ export function RequireRole({ roles, children }: { roles: ReadonlyArray<Role>; c
     );
   }
   if (!isAuthed) return <Navigate to="/login" replace />;
-  if (!role || !roles.includes(role)) return <Navigate to="/" replace />;
+  if (!role || !roles.includes(role)) return <Navigate to="/403" replace />;
   return <>{children}</>;
 }

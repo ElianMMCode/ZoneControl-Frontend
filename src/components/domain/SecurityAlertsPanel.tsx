@@ -13,7 +13,6 @@ import type { AccessAlertDto } from "@/types";
 const tipoLabel: Record<AccessAlertDto["tipo"], string> = {
   DENEGACIONES_REPETIDAS: "Denegaciones repetidas",
   ZONA_EMERGENCIA: "Emergencia de zona",
-  ACCESO_FUERA_HORARIO: "Acceso fuera de horario",
 };
 
 const severidadTone: Record<AccessAlertDto["severidad"], "error" | "warning" | "info"> = {

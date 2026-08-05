@@ -23,6 +23,7 @@ import { ZonesView } from "@/views/supervisor/ZonesView";
 import { RoleMatrixView } from "@/views/admin/RoleMatrixView";
 import { SettingsView } from "@/views/settings/SettingsView";
 import { NotFoundView } from "@/views/NotFoundView";
+import { ForbiddenView } from "@/views/ForbiddenView";
 import type { Role } from "@/types";
 
 type RouteHandle = { title?: string };
@@ -199,6 +200,7 @@ const router = createBrowserRouter([
       },
     ],
   },
+  { path: "/403", element: <ForbiddenView /> },
   { path: "*", element: <NotFoundView /> },
 ]);
 
