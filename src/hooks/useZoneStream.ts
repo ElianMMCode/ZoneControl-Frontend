@@ -1,14 +1,39 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import type { AccessAlertDto, AreaOccupancy, RealtimeEvent, ZoneSnapshot } from "@/types";
+import type { AccessAlertDto, AccessHistoryResponse, AccessResult, AreaOccupancy, RealtimeEvent, ZoneSnapshot } from "@/types";
 
 export type ValidatedEvent = Extract<RealtimeEvent, { type: "access.validated" }>;
+
+const RESULT_MESSAGE: Record<AccessResult, string> = {
+  AUTHORIZED: "INGRESO AUTORIZADO",
+  DENIED: "INGRESO DENEGADO",
+  UNREGISTERED: "NO REGISTRADO",
+  SUSPENDED: "ACCESO SUSPENDIDO",
+};
+
+const today = new Date();
+const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+function toValidatedEvent(h: AccessHistoryResponse): ValidatedEvent {
+  return {
+    type: "access.validated",
+    employeeCode: h.employeeCode ?? "N/A",
+    area: h.productionAreaName,
+    result: h.result,
+    message: RESULT_MESSAGE[h.result],
+    timestamp: h.timestamp,
+  };
+}
 
 /**
  * Suscripción SSE al stream de zonas en vivo (§9.3 item 2.3).
  * EventSource no permite header Authorization, por eso el token viaja como
  * query param (el backend solo lo acepta en /api/access/stream).
  * Se reconecta automáticamente (EventSource nativo) y refresca el snapshot.
+ * Las "validaciones recientes" arrancan con el historial persistido
+ * (GET /api/historial) y luego se alimentan en vivo con SSE, para que la
+ * evidencia de cada intento quede visible aunque se recargue la vista.
  */
 export function useZoneStream() {
   const token = useAuthStore((s) => s.token);
@@ -76,6 +101,21 @@ export function useZoneStream() {
       }
     };
 
+    const loadRecentValidations = async () => {
+      try {
+        const res = await fetch(
+          `/api/historial?fechaInicio=${iso(thirtyDaysAgo)}&fechaFin=${iso(today)}&page=0&size=20&sort=timestamp,desc`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (!res.ok) return;
+        const json = (await res.json()) as { content: AccessHistoryResponse[] };
+        const persisted = json.content.map(toValidatedEvent);
+        setValidations((v) => [...v, ...persisted].slice(0, 30));
+      } catch {
+        // ignore: la lista queda vacía hasta el primer evento en vivo
+      }
+    };
+
     es.addEventListener("snapshot", onEvent("snapshot"));
     es.addEventListener("access.validated", onEvent("access.validated"));
     es.addEventListener("occupancy.updated", onEvent("occupancy.updated"));
@@ -90,6 +130,8 @@ export function useZoneStream() {
       setConnected(false);
       setError("Reconectando al stream de zonas…");
     };
+
+    loadRecentValidations();
 
     return () => {
       es.close();

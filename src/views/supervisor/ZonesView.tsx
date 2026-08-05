@@ -149,11 +149,11 @@ export function ZonesView() {
       <section className="card space-y-3">
         <header className="card-header">
           <h2 className="text-heading-md">Validaciones recientes</h2>
-          <span className="label-caps">En vivo</span>
+          <span className="label-caps">En vivo + 30 días</span>
         </header>
         {stream.validations.length === 0 ? (
           <p className="text-body-sm text-on-surface-variant">
-            Aún no hay validaciones en esta sesión. Usa <b>Validar Credencial</b> para registrar accesos.
+            No hay validaciones en los últimos 30 días. Usa <b>Validar Credencial</b> para registrar accesos.
           </p>
         ) : (
           <ul className="divide-y divide-outline-variant">
