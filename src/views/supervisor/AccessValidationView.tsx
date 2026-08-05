@@ -45,6 +45,7 @@ export function AccessValidationView() {
         body: { employeeCode: employeeCode.trim(), productionAreaName: area },
       });
       setResult(res);
+      setEmployeeCode("");
     } catch (err) {
       if (isApiError(err)) toast.error(err.message);
       else toast.error("No se pudo validar el acceso");
@@ -128,16 +129,43 @@ export function AccessValidationView() {
               </span>
               <p className="text-heading-md font-semibold">{style.title}</p>
               <p className="text-body-md">{result.message}</p>
-              <dl className="mt-2 grid w-full grid-cols-2 gap-2 text-left">
-                <div>
-                  <dt className="label-caps">Código</dt>
-                  <dd className="font-mono text-body-sm">{employeeCode.trim()}</dd>
-                </div>
-                <div>
-                  <dt className="label-caps">Zona</dt>
-                  <dd className="text-body-sm">{area}</dd>
-                </div>
-              </dl>
+              {result.employeeName ? (
+                <dl className="grid w-full grid-cols-1 gap-2 text-left sm:grid-cols-2">
+                  <div>
+                    <dt className="label-caps">Empleado</dt>
+                    <dd className="text-body-sm">{result.employeeName}</dd>
+                  </div>
+                  {result.position ? (
+                    <div>
+                      <dt className="label-caps">Cargo</dt>
+                      <dd className="text-body-sm">{result.position}</dd>
+                    </div>
+                  ) : null}
+                  {result.department ? (
+                    <div>
+                      <dt className="label-caps">Departamento</dt>
+                      <dd className="text-body-sm">{result.department}</dd>
+                    </div>
+                  ) : null}
+                  {result.employeeCode ? (
+                    <div>
+                      <dt className="label-caps">Código</dt>
+                      <dd className="font-mono text-body-sm">{result.employeeCode}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              ) : (
+                <dl className="grid w-full grid-cols-2 gap-2 text-left">
+                  <div>
+                    <dt className="label-caps">Código</dt>
+                    <dd className="font-mono text-body-sm">{result.employeeCode ?? employeeCode.trim()}</dd>
+                  </div>
+                  <div>
+                    <dt className="label-caps">Zona</dt>
+                    <dd className="text-body-sm">{area}</dd>
+                  </div>
+                </dl>
+              )}
             </div>
           ) : null}
         </section>

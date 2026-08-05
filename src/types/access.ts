@@ -8,6 +8,11 @@ export interface ValidateAccessRequest {
 export interface ValidateAccessResponse {
   result: AccessResult;
   message: string;
+  /** Datos del empleado que intentó el ingreso (null si no se pudo resolver). */
+  employeeCode?: string | null;
+  employeeName?: string | null;
+  position?: string | null;
+  department?: string | null;
 }
 
 export interface ZoneSnapshot {
