@@ -13,6 +13,7 @@ const statusTone: Record<string, BadgeTone> = {
   AUTHORIZED: "active",
   DENIED: "error",
   UNREGISTERED: "error",
+  EXIT: "inactive",
   CANCELLED: "error",
 };
 
@@ -24,6 +25,7 @@ const statusLabel: Record<string, string> = {
   DENIED: "Denegado",
   UNREGISTERED: "No registrado",
   SUSPENDED: "Suspendido",
+  EXIT: "Salida",
 };
 
 export function StatusPill({ status }: { status: Status }) {

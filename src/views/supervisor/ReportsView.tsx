@@ -252,6 +252,7 @@ export function ReportsView() {
               <Option value="DENIED">Denegado</Option>
               <Option value="UNREGISTERED">No registrado</Option>
               <Option value="SUSPENDED">Suspendido</Option>
+              <Option value="EXIT">Salida</Option>
             </Select>
           </FormField>
         </div>

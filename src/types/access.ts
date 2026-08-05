@@ -13,6 +13,18 @@ export interface ValidateAccessResponse {
   employeeName?: string | null;
   position?: string | null;
   department?: string | null;
+  productionAreaName?: string | null;
+}
+
+export interface ExitResponse {
+  result: AccessResult;
+  message: string;
+  employeeCode: string | null;
+  employeeName: string | null;
+  position: string | null;
+  department: string | null;
+  productionAreaName: string;
+  timestamp: string;
 }
 
 export interface ZoneSnapshot {
@@ -34,7 +46,7 @@ export interface AreaOccupancy {
 
 export interface AccessAlertDto {
   id: string;
-  tipo: "ACCESO_NOCTURNO" | "DENEGACIONES_REPETIDAS" | "ZONA_EMERGENCIA" | "ACCESO_FUERA_HORARIO";
+  tipo: "DENEGACIONES_REPETIDAS" | "ZONA_EMERGENCIA" | "ACCESO_FUERA_HORARIO";
   severidad: "LOW" | "MEDIUM" | "HIGH";
   employeeCode: string | null;
   productionAreaName: string | null;

@@ -85,7 +85,8 @@ export interface AccessHistoryRecord {
     | "AUTHORIZED"
     | "DENIED"
     | "UNREGISTERED"
-    | "SUSPENDED";
+    | "SUSPENDED"
+    | "EXIT";
 }
 
 export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {

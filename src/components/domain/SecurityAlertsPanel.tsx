@@ -11,7 +11,6 @@ import { formatDateTime } from "@/lib/format";
 import type { AccessAlertDto } from "@/types";
 
 const tipoLabel: Record<AccessAlertDto["tipo"], string> = {
-  ACCESO_NOCTURNO: "Acceso nocturno",
   DENEGACIONES_REPETIDAS: "Denegaciones repetidas",
   ZONA_EMERGENCIA: "Emergencia de zona",
   ACCESO_FUERA_HORARIO: "Acceso fuera de horario",
@@ -37,7 +36,6 @@ const severidadIconClass: Record<AccessAlertDto["severidad"], string> = {
 
 function alertIcon(tipo: AccessAlertDto["tipo"]): string {
   if (tipo === "ZONA_EMERGENCIA") return "emergency";
-  if (tipo === "ACCESO_NOCTURNO") return "nightlight";
   return "warning";
 }
 

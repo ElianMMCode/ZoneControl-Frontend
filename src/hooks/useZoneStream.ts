@@ -9,6 +9,7 @@ const RESULT_MESSAGE: Record<AccessResult, string> = {
   DENIED: "INGRESO DENEGADO",
   UNREGISTERED: "NO REGISTRADO",
   SUSPENDED: "ACCESO SUSPENDIDO",
+  EXIT: "SALIDA REGISTRADA",
 };
 
 const today = new Date();
