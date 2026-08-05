@@ -20,6 +20,7 @@ function toValidatedEvent(h: AccessHistoryResponse): ValidatedEvent {
   return {
     type: "access.validated",
     employeeCode: h.employeeCode ?? "N/A",
+    employeeName: h.employeeName ?? null,
     area: h.productionAreaName,
     result: h.result,
     message: RESULT_MESSAGE[h.result],

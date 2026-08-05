@@ -134,9 +134,10 @@ export function ZonesView() {
     },
   ];
 
-  const validationColumns: Column<{ employeeCode: string; area: string; result: AccessResult; timestamp: string }>[] = [
+  const validationColumns: Column<{ employeeCode: string; employeeName?: string | null; area: string; result: AccessResult; timestamp: string }>[] = [
     { key: "time", header: "Hora", render: (v) => formatDateTime(v.timestamp) },
     { key: "code", header: "Código", render: (v) => <span className="font-mono text-body-sm">{v.employeeCode}</span> },
+    { key: "name", header: "Empleado", render: (v) => v.employeeName ?? "—" },
     { key: "area", header: "Área", render: (v) => v.area },
     { key: "result", header: "Resultado", render: (v) => <StatusPill status={v.result} /> },
   ];
