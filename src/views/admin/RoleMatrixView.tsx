@@ -5,30 +5,38 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useResource } from "@/hooks/useResource";
 import type { Role } from "@/types";
 
-type AccessMap = Record<Role, boolean>;
+type AccessLevel = "NINGUNO" | "LECTURA" | "ESCRITURA";
+type AccessMap = Record<Role, AccessLevel>;
 type ModuleRow = { module: string; icon: string; access: AccessMap };
 type RoleMatrixResponse = { roles: Role[]; modules: ModuleRow[] };
 
 const FALLBACK_ROLES: Role[] = ["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"];
 
-function access(...allowed: Role[]): AccessMap {
+function levels(spec: Partial<Record<Role, AccessLevel>>): AccessMap {
   return {
-    ADMIN: allowed.includes("ADMIN"),
-    GESTOR_PERSONAL: allowed.includes("GESTOR_PERSONAL"),
-    SUPERVISOR_AUDITOR: allowed.includes("SUPERVISOR_AUDITOR"),
+    ADMIN: spec.ADMIN ?? "NINGUNO",
+    GESTOR_PERSONAL: spec.GESTOR_PERSONAL ?? "NINGUNO",
+    SUPERVISOR_AUDITOR: spec.SUPERVISOR_AUDITOR ?? "NINGUNO",
   };
 }
 
 const FALLBACK_ROWS: ModuleRow[] = [
-  { module: "Usuarios del sistema", icon: "group", access: access("ADMIN") },
-  { module: "Contenido público", icon: "public", access: access("ADMIN") },
-  { module: "Áreas de producción", icon: "domain", access: access("ADMIN", "GESTOR_PERSONAL") },
-  { module: "Gestión de personal", icon: "badge", access: access("ADMIN", "GESTOR_PERSONAL") },
-  { module: "Permisos de acceso", icon: "vpn_key", access: access("ADMIN", "GESTOR_PERSONAL") },
-  { module: "Control de acceso físico", icon: "meeting_room", access: access("ADMIN", "SUPERVISOR_AUDITOR") },
-  { module: "Reportes / Auditoría", icon: "summarize", access: access("ADMIN", "SUPERVISOR_AUDITOR") },
-  { module: "Ajustes / Perfil", icon: "settings", access: access("ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR") },
+  { module: "Usuarios del sistema", icon: "group", access: levels({ ADMIN: "ESCRITURA" }) },
+  { module: "Contenido público", icon: "public", access: levels({ ADMIN: "ESCRITURA" }) },
+  { module: "Áreas de producción", icon: "domain", access: levels({ ADMIN: "ESCRITURA", GESTOR_PERSONAL: "ESCRITURA", SUPERVISOR_AUDITOR: "LECTURA" }) },
+  { module: "Cargos", icon: "badge", access: levels({ ADMIN: "ESCRITURA", GESTOR_PERSONAL: "LECTURA", SUPERVISOR_AUDITOR: "LECTURA" }) },
+  { module: "Gestión de personal", icon: "groups", access: levels({ ADMIN: "ESCRITURA", GESTOR_PERSONAL: "ESCRITURA", SUPERVISOR_AUDITOR: "LECTURA" }) },
+  { module: "Permisos de acceso", icon: "vpn_key", access: levels({ ADMIN: "ESCRITURA", GESTOR_PERSONAL: "ESCRITURA", SUPERVISOR_AUDITOR: "LECTURA" }) },
+  { module: "Control de acceso físico", icon: "meeting_room", access: levels({ ADMIN: "ESCRITURA", SUPERVISOR_AUDITOR: "ESCRITURA" }) },
+  { module: "Reportes / Auditoría", icon: "summarize", access: levels({ ADMIN: "ESCRITURA", SUPERVISOR_AUDITOR: "ESCRITURA" }) },
+  { module: "Ajustes / Perfil", icon: "settings", access: levels({ ADMIN: "ESCRITURA", GESTOR_PERSONAL: "ESCRITURA", SUPERVISOR_AUDITOR: "ESCRITURA" }) },
 ];
+
+const LEVEL_CELL: Record<AccessLevel, { icon: string; tone: string; title: string } | null> = {
+  ESCRITURA: { icon: "check", tone: "bg-secondary-container text-secondary", title: "Escritura" },
+  LECTURA: { icon: "visibility", tone: "bg-primary-container text-primary", title: "Lectura (solo consulta)" },
+  NINGUNO: null,
+};
 
 export function RoleMatrixView() {
   const matrix = useResource<RoleMatrixResponse>("/api/admin/role-matrix");
@@ -49,7 +57,7 @@ export function RoleMatrixView() {
         </header>
 
         {matrix.loading ? (
-          <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 9 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-outline-variant">
             <table className="data-table">
@@ -72,17 +80,23 @@ export function RoleMatrixView() {
                         {row.module}
                       </span>
                     </td>
-                    {roles.map((r) => (
-                      <td key={r} className="text-center">
-                        {row.access[r] ? (
-                          <span className="inline-grid h-7 w-7 place-items-center rounded-full bg-secondary-container text-secondary">
-                            <Icon name="check" size="sm" />
-                          </span>
-                        ) : (
-                          <span className="text-on-surface-variant">—</span>
-                        )}
-                      </td>
-                    ))}
+                    {roles.map((r) => {
+                      const cell = LEVEL_CELL[row.access[r]] ?? null;
+                      return (
+                        <td key={r} className="text-center">
+                          {cell ? (
+                            <span
+                              title={cell.title}
+                              className={`inline-grid h-7 w-7 place-items-center rounded-full ${cell.tone}`}
+                            >
+                              <Icon name={cell.icon} size="sm" />
+                            </span>
+                          ) : (
+                            <span className="text-on-surface-variant">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
@@ -90,11 +104,17 @@ export function RoleMatrixView() {
           </div>
         )}
 
-        <p className="text-body-sm text-on-surface-variant">
-          {matrix.data
-            ? "Matriz reconstruida desde el backend (GET /api/admin/role-matrix), alineada con SecurityConfig."
-            : "Mostrando la matriz por defecto (el endpoint /api/admin/role-matrix no respondió)."}
-        </p>
+        <div className="flex flex-wrap items-center gap-4 text-body-sm text-on-surface-variant">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-grid h-5 w-5 place-items-center rounded-full bg-secondary-container text-secondary"><Icon name="check" size="sm" /></span>
+            Escritura
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-grid h-5 w-5 place-items-center rounded-full bg-primary-container text-primary"><Icon name="visibility" size="sm" /></span>
+            Lectura (solo consulta)
+          </span>
+          <span className="flex items-center gap-1.5"><span className="text-on-surface-variant">—</span> Sin acceso</span>
+        </div>
       </section>
     </div>
   );
