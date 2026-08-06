@@ -15,7 +15,6 @@ export interface UserResponse {
 
 export interface CreateUserRequest {
   employeeCode: string;
-  role: Role;
   status: UserStatus;
 }
 

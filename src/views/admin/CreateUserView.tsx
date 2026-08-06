@@ -15,11 +15,10 @@ import { useUserMutations } from "@/hooks/useUsers";
 import { useResource } from "@/hooks/useResource";
 import { isApiError } from "@/lib/api";
 import { RolePill } from "@/components/common/RolePill";
-import type { EmployeeSearchResponse, Page, Role, UserStatus } from "@/types";
+import type { EmployeeSearchResponse, Page, UserStatus } from "@/types";
 
 const schema = z.object({
   employeeCode: z.string().min(1, "Selecciona un empleado"),
-  role: z.enum(["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"]),
   status: z.enum(["ACTIVO", "INACTIVO"]),
 });
 
@@ -46,7 +45,6 @@ export function CreateUserView() {
   } = useForm<FormValues>({
     defaultValues: {
       employeeCode: preselectedCode,
-      role: "GESTOR_PERSONAL" as Role,
       status: "ACTIVO" as UserStatus,
     },
   });
@@ -57,14 +55,12 @@ export function CreateUserView() {
     if (match) {
       setValue("employeeCode", match.employeeCode, { shouldValidate: true });
       setSelected(match);
-      if (match.systemRole) setValue("role", match.systemRole, { shouldValidate: true });
     }
   }, [candidates.data, preselectedCode, setValue]);
 
   const onSubmit = handleSubmit(async (values) => {
     const res = await create({
       employeeCode: values.employeeCode,
-      role: values.role,
       status: values.status,
     });
     if (res) {
@@ -111,7 +107,6 @@ export function CreateUserView() {
                     const code = e.target.value;
                     const match = candidates.data?.content.find((emp) => emp.employeeCode === code);
                     setSelected(match ?? null);
-                    if (match?.systemRole) setValue("role", match.systemRole, { shouldValidate: true });
                   },
                 })}
               >
@@ -140,26 +135,30 @@ export function CreateUserView() {
               </p>
               {selected.systemRole ? (
                 <p className="mt-2 flex items-center gap-2">
-                  <span className="label-caps">Rol sugerido</span>
+                  <span className="label-caps">Rol del sistema</span>
                   <RolePill role={selected.systemRole} />
                 </p>
-              ) : null}
+              ) : (
+                <p className="mt-2 text-body-sm text-on-surface-variant">
+                  El empleado no tiene un rol de sistema asignado (su cargo no lo define), por lo que no se puede crear el usuario.
+                </p>
+              )}
             </div>
           ) : null}
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <SelectField
-              id="role"
-              label="Rol"
-              error={errors.role?.message}
-              required
-            >
-              <Select id="role" {...register("role")}>
-                <Option value="ADMIN">Admin</Option>
-                <Option value="GESTOR_PERSONAL">Gestor Personal</Option>
-                <Option value="SUPERVISOR_AUDITOR">Supervisor Auditor</Option>
-              </Select>
-            </SelectField>
+            <FormField id="role" label="Rol del sistema">
+              {selected?.systemRole ? (
+                <div className="flex h-10 items-center rounded-md border border-outline-variant bg-surface-container/40 px-3">
+                  <RolePill role={selected.systemRole} />
+                </div>
+              ) : (
+                <input id="role" className="input" value="—" disabled />
+              )}
+              <p className="field-help">
+                El rol se deriva del cargo del empleado (no se elige manualmente).
+              </p>
+            </FormField>
             <SelectField
               id="status"
               label="Estado inicial"

@@ -12,6 +12,7 @@ export interface EmployeeResponse {
   firstName: string;
   lastName: string;
   position: string;
+  cargoId: string | null;
   email: string | null;
   documentType: DocumentType;
   documentNumber: string;
@@ -28,15 +29,20 @@ export interface EmployeeResponse {
 
 export interface EmployeeSearchResponse extends EmployeeResponse {}
 
+export interface Position {
+  id: string;
+  name: string;
+  systemRole: Role | null;
+}
+
 export interface RegisterEmployeeRequest {
   documentType: DocumentType;
   documentNumber: string;
   firstName: string;
   lastName: string;
-  position: string;
+  cargoId: string;
   departmentName: string;
   email?: string;
-  systemRole?: Role;
   contractType?: ContractType;
   baseOfficeName?: string;
   workShift?: WorkShift;
@@ -54,13 +60,12 @@ export interface RegisterEmployeeResponse {
 export interface UpdateEmployeeRequest {
   firstName?: string;
   lastName?: string;
-  position?: string;
+  cargoId?: string;
   email?: string;
   documentType?: DocumentType;
   documentNumber?: string;
   departmentName?: string;
   status?: EmployeeStatus;
-  systemRole?: Role;
   contractType?: ContractType;
   baseOfficeName?: string;
   workShift?: WorkShift;

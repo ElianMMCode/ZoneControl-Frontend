@@ -5,6 +5,7 @@ import type {
   EmployeeSearchResponse,
   OfficeResponse,
   PermissionResponse,
+  Position,
   ProductionArea,
   RegisterEmployeeRequest,
   UpdateEmployeeRequest,
@@ -16,6 +17,7 @@ export type { OfficeResponse };
 
 const DEPARTMENTS_PATH = "/api/personal/departamentos";
 const OFFICES_PATH = "/api/personal/sedes";
+const CARGOS_PATH = "/api/personal/cargos";
 const AREAS_PATH = "/api/permisos/areas";
 const PERMISSIONS_PATH = "/api/permisos";
 
@@ -38,6 +40,52 @@ export function useDepartments() {
     return () => ctrl.abort();
   }, [tick]);
   return { data, loading, error, refresh };
+}
+
+export function useCargos() {
+  const [data, setData] = useState<Position[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [tick, setTick] = useState(0);
+  const refresh = useCallback(() => setTick((t) => t + 1), []);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    setLoading(true);
+    setError(null);
+    apiFetch<Position[]>(CARGOS_PATH, { signal: ctrl.signal })
+      .then((res) => setData(res))
+      .catch((e) => {
+        if ((e as { name?: string })?.name !== "AbortError") setError(e as Error);
+      })
+      .finally(() => setLoading(false));
+    return () => ctrl.abort();
+  }, [tick]);
+
+  const create = useCallback(async (name: string, systemRole?: string | null) => {
+    const created = await apiFetch<Position>(CARGOS_PATH, {
+      method: "POST",
+      body: { name, systemRole: systemRole || undefined },
+    });
+    refresh();
+    return created;
+  }, [refresh]);
+
+  const update = useCallback(async (id: string, name: string, systemRole?: string | null) => {
+    const updated = await apiFetch<Position>(`${CARGOS_PATH}/${id}`, {
+      method: "PUT",
+      body: { name, systemRole: systemRole || undefined },
+    });
+    refresh();
+    return updated;
+  }, [refresh]);
+
+  const remove = useCallback(async (id: string) => {
+    await apiFetch<{ message: string }>(`${CARGOS_PATH}/${id}`, { method: "DELETE" });
+    refresh();
+  }, [refresh]);
+
+  return { data, loading, error, refresh, create, update, remove };
 }
 
 export function useOffices() {

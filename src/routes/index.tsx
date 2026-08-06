@@ -11,6 +11,7 @@ import { UsersView } from "@/views/admin/UsersView";
 import { CreateUserView } from "@/views/admin/CreateUserView";
 import { PublicContentView } from "@/views/admin/PublicContentView";
 import { AdminAreasView } from "@/views/admin/AdminAreasView";
+import { AdminCargosView } from "@/views/admin/AdminCargosView";
 import { EmployeeListView } from "@/views/personal/EmployeeListView";
 import { RegisterEmployeeView } from "@/views/personal/RegisterEmployeeView";
 import { BulkUploadView } from "@/views/personal/BulkUploadView";
@@ -141,6 +142,15 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
             <AdminAreasView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/admin/cargos",
+        handle: { title: "Cargos" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN"] as ReadonlyArray<Role>}>
+            <AdminCargosView />
           </RequireRole>
         ),
       },

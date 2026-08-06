@@ -8,6 +8,7 @@ import { Select, Option } from "@/components/ui/Select";
 import { Icon } from "@/components/ui/Icon";
 import { isApiError } from "@/lib/api";
 import {
+  useCargos,
   useDepartments,
   useEmployeeMutations,
   useOffices,
@@ -28,7 +29,7 @@ export function RegisterEmployeeView() {
     documentNumber: "",
     firstName: "",
     lastName: "",
-    position: "",
+    cargoId: "",
     departmentName: "",
     email: "",
     contractType: "" as "" | ContractType,
@@ -45,6 +46,7 @@ export function RegisterEmployeeView() {
 
   const departments = useDepartments();
   const offices = useOffices();
+  const cargos = useCargos();
   const { register, uploadPhoto } = useEmployeeMutations();
 
   const onChange = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
@@ -71,8 +73,8 @@ export function RegisterEmployeeView() {
     if (form.lastName.trim().length < 2) {
       errs.lastName = "Los apellidos deben tener al menos 2 caracteres";
     }
-    if (!form.position.trim()) {
-      errs.position = "El cargo es obligatorio";
+    if (!form.cargoId) {
+      errs.cargoId = "El cargo es obligatorio";
     }
     if (!form.departmentName) {
       errs.departmentName = "El departamento es obligatorio";
@@ -97,7 +99,7 @@ export function RegisterEmployeeView() {
         documentNumber: form.documentNumber,
         firstName: form.firstName,
         lastName: form.lastName,
-        position: form.position,
+        cargoId: form.cargoId,
         departmentName: form.departmentName,
         email: form.email || undefined,
         contractType: form.contractType || undefined,
@@ -187,15 +189,19 @@ export function RegisterEmployeeView() {
                 aria-invalid={!!fieldErrors.lastName}
               />
             </FormField>
-            <FormField id="position" label="Cargo" error={fieldErrors.position} required>
-              <input
-                id="position"
-                className="input"
-                value={form.position}
-                onChange={(e) => onChange("position", e.target.value)}
-                maxLength={30}
-                aria-invalid={!!fieldErrors.position}
-              />
+            <FormField id="cargoId" label="Cargo" error={fieldErrors.cargoId} required>
+              <Select
+                id="cargoId"
+                value={form.cargoId}
+                onChange={(e) => onChange("cargoId", e.target.value)}
+                disabled={cargos.loading}
+                aria-invalid={!!fieldErrors.cargoId}
+              >
+                <Option value="">Seleccione…</Option>
+                {cargos.data?.map((c) => (
+                  <Option key={c.id} value={c.id}>{c.name}</Option>
+                ))}
+              </Select>
             </FormField>
             <FormField id="departmentName" label="Departamento" error={fieldErrors.departmentName} required>
               <Select

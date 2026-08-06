@@ -18,6 +18,7 @@ const items: Item[] = [
   { to: "/admin/usuarios", label: "Usuarios", icon: "group", roles: ["ADMIN"], end: true },
   { to: "/admin/matriz-roles", label: "Roles", icon: "verified_user", roles: ["ADMIN"] },
   { to: "/admin/areas", label: "Áreas", icon: "domain", roles: ["ADMIN"] },
+  { to: "/admin/cargos", label: "Cargos", icon: "badge", roles: ["ADMIN"] },
   { to: "/admin/contenido-publico", label: "Contenido Público", icon: "public", roles: ["ADMIN"] },
   { to: "/personal", label: "Gestión Personal", icon: "badge", roles: ["GESTOR_PERSONAL"], end: true },
   { to: "/personal/nuevo", label: "Registrar Personal", icon: "person_add", roles: ["GESTOR_PERSONAL"] },

@@ -15,6 +15,7 @@ import { useResource } from "@/hooks/useResource";
 import { apiFetch, isApiError } from "@/lib/api";
 import {
   useAreas,
+  useCargos,
   useDepartments,
   useEmployeeAccessHistory,
   useEmployeeMutations,
@@ -503,7 +504,7 @@ function toUpdateRequest(form: EditFormValues) {
   return {
     firstName: form.firstName,
     lastName: form.lastName,
-    position: form.position,
+    cargoId: form.cargoId || undefined,
     email: form.email || undefined,
     documentType: form.documentType,
     documentNumber: form.documentNumber,
@@ -522,7 +523,7 @@ type EditFormValues = {
   documentNumber: string;
   firstName: string;
   lastName: string;
-  position: string;
+  cargoId: string;
   departmentName: string;
   email: string;
   status: EmployeeStatus;
@@ -544,12 +545,13 @@ function EditEmployeeForm({
 }) {
   const departments = useDepartments();
   const offices = useOffices();
+  const cargos = useCargos();
   const [form, setForm] = useState<EditFormValues>({
     documentType: employee.documentType,
     documentNumber: employee.documentNumber,
     firstName: employee.firstName,
     lastName: employee.lastName,
-    position: employee.position,
+    cargoId: employee.cargoId ?? "",
     departmentName: employee.departmentName,
     email: employee.email ?? "",
     status: employee.status,
@@ -596,8 +598,18 @@ function EditEmployeeForm({
         <FormField id="edit-lastName" label="Apellidos" required>
           <input id="edit-lastName" className="input" maxLength={35} value={form.lastName} onChange={(e) => onChange("lastName", e.target.value)} required />
         </FormField>
-        <FormField id="edit-position" label="Cargo" required>
-          <input id="edit-position" className="input" maxLength={30} value={form.position} onChange={(e) => onChange("position", e.target.value)} required />
+        <FormField id="edit-cargoId" label="Cargo" required>
+          <Select
+            id="edit-cargoId"
+            value={form.cargoId}
+            onChange={(e) => onChange("cargoId", e.target.value)}
+            disabled={cargos.loading}
+          >
+            <Option value="">Seleccione…</Option>
+            {cargos.data?.map((c) => (
+              <Option key={c.id} value={c.id}>{c.name}</Option>
+            ))}
+          </Select>
         </FormField>
         <FormField id="edit-email" label="Email">
           <input id="edit-email" type="email" className="input" value={form.email} onChange={(e) => onChange("email", e.target.value)} />

@@ -118,6 +118,7 @@ export function AdminDashboard() {
           { label: "Gestión de usuarios", icon: "group", to: "/admin/usuarios" },
           { label: "Contenido público", icon: "public", to: "/admin/contenido-publico" },
           { label: "Áreas de producción", icon: "domain", to: "/admin/areas" },
+          { label: "Cargos", icon: "badge", to: "/admin/cargos" },
           { label: "Matriz de roles", icon: "verified_user", to: "/admin/matriz-roles" },
           { label: "Exportar historial", icon: "summarize", to: "/supervisor/reportes" },
         ]}
