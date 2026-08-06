@@ -13,17 +13,19 @@ import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useResource } from "@/hooks/useResource";
 import { employeeListQuery } from "@/hooks/useEmployees";
-import { useDepartments } from "@/hooks/useGestor";
+import { useDepartments, useCargos } from "@/hooks/useGestor";
 import type { DocumentType, EmployeeSearchResponse, EmployeeStatus, Page } from "@/types";
 
 export function EmployeeListView() {
   const navigate = useNavigate();
   const departments = useDepartments();
+  const cargos = useCargos();
   const [documentType, setDocumentType] = useState<DocumentType | "">("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [departmentName, setDepartmentName] = useState("");
+  const [cargoName, setCargoName] = useState("");
   const [status, setStatus] = useState<EmployeeStatus | "">("");
   const [page, setPage] = useState(0);
 
@@ -35,11 +37,12 @@ export function EmployeeListView() {
       firstName: firstName || undefined,
       lastName: lastName || undefined,
       departmentName: departmentName || undefined,
+      cargoName: cargoName || undefined,
       status: status || undefined,
       page,
       size: 10,
     }),
-    [documentType, documentNumber, firstName, lastName, departmentName, status, page],
+    [documentType, documentNumber, firstName, lastName, departmentName, cargoName, status, page],
   );
 
   // KPIs derivados de la respuesta actual (de la página actual).
@@ -165,6 +168,14 @@ export function EmployeeListView() {
               <Option value="">Todos</Option>
               {departments.data?.map((d) => (
                 <Option key={d} value={d}>{d}</Option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField id="cargo" label="Cargo">
+            <Select id="cargo" value={cargoName} onChange={(e) => setCargoName(e.target.value)} disabled={cargos.loading}>
+              <Option value="">Todos</Option>
+              {cargos.data?.map((c) => (
+                <Option key={c.id} value={c.name}>{c.name}</Option>
               ))}
             </Select>
           </FormField>
