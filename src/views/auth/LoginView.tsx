@@ -64,7 +64,16 @@ export function LoginView() {
       <div className="card">
         <header className="mb-4 text-center">
           <h1 className="text-heading-lg text-on-surface">Iniciar sesión</h1>
-          <p className="mt-1 text-body-sm text-on-surface-variant">Acceso interno · Laboratorio XYZ</p>
+          <p className="mt-1 text-body-sm text-on-surface-variant">
+            Acceso exclusivo para el personal interno de Laboratorio XYZ
+          </p>
+          <p className="mt-2 inline-flex items-center gap-1 rounded-md bg-surface-container px-3 py-1.5 text-body-sm text-on-surface-variant">
+            <Icon name="info" size="sm" />
+            Este portal no es para visitantes; si deseas conocernos, vuelve al{" "}
+            <Link to="/" className="text-primary hover:underline">
+              sitio público
+            </Link>
+          </p>
         </header>
         {errorMsg ? <Alert tone="error" title="No fue posible iniciar sesión" className="mb-4">{errorMsg}</Alert> : null}
         <form className="space-y-4" onSubmit={onSubmit} noValidate>
