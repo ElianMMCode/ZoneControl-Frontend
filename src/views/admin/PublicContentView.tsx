@@ -119,11 +119,18 @@ function OfficesPanel({
   const [editing, setEditing] = useState<OfficeResponse | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<OfficeResponse | null>(null);
+  const [removingImage, setRemovingImage] = useState(false);
 
-  const handleSubmit = async (values: OfficeRequest) => {
+  const handleSubmit = async (values: OfficeRequest, imageFile: File | null) => {
     if (editing) {
       const res = await mutations.updateOffice(editing.id, values);
       if (res) {
+        if (imageFile) {
+          const img = await mutations.uploadOfficeImage(editing.id, imageFile);
+          if (!img) {
+            toast.error(mutations.error?.message ?? "No se pudo subir la imagen");
+          }
+        }
         toast.success("Sede actualizada");
         onRefresh();
       } else {
@@ -133,11 +140,27 @@ function OfficesPanel({
     }
     const res = await mutations.createOffice(values);
     if (res) {
+      if (imageFile && res.id) {
+        const img = await mutations.uploadOfficeImage(res.id, imageFile);
+        if (!img) {
+          toast.error(mutations.error?.message ?? "No se pudo subir la imagen");
+        }
+      }
       toast.success("Sede creada");
       onRefresh();
     } else {
       toast.error(mutations.error?.message ?? "No se pudo crear la sede");
     }
+    return !!res;
+  };
+
+  const handleRemoveImage = async () => {
+    if (!editing) return false;
+    setRemovingImage(true);
+    const res = await mutations.deleteOfficeImage(editing.id);
+    setRemovingImage(false);
+    if (res) onRefresh();
+    else toast.error(mutations.error?.message ?? "No se pudo quitar la imagen");
     return !!res;
   };
 
@@ -154,6 +177,21 @@ function OfficesPanel({
   };
 
   const columns: Column<OfficeResponse>[] = [
+    {
+      key: "image",
+      header: "",
+      render: (o) => (
+        <div className="h-10 w-10 overflow-hidden rounded-md bg-surface-container-highest ring-1 ring-outline-variant">
+          {o.imageUrl ? (
+            <img src={o.imageUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="grid h-full w-full place-items-center text-on-surface-variant">
+              <Icon name="location_on" size="sm" />
+            </div>
+          )}
+        </div>
+      ),
+    },
     { key: "name", header: "Nombre", render: (o) => o.name },
     { key: "address", header: "Dirección", render: (o) => o.address },
     { key: "hours", header: "Horario", render: (o) => o.openingHours || "—" },
@@ -218,6 +256,8 @@ function OfficesPanel({
         initial={editing}
         loading={mutations.loading}
         errorMessage={mutations.error?.message}
+        removingImage={removingImage}
+        onRemoveImage={handleRemoveImage}
       />
       <ConfirmDialog
         open={!!deleting}
@@ -252,11 +292,18 @@ function ProductsPanel({
   const [editing, setEditing] = useState<CatalogResponse | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<CatalogResponse | null>(null);
+  const [removingImage, setRemovingImage] = useState(false);
 
-  const handleSubmit = async (values: ProductRequest) => {
+  const handleSubmit = async (values: ProductRequest, imageFile: File | null) => {
     if (editing) {
       const res = await mutations.updateProduct(editing.id, values);
       if (res) {
+        if (imageFile) {
+          const img = await mutations.uploadProductImage(editing.id, imageFile);
+          if (!img) {
+            toast.error(mutations.error?.message ?? "No se pudo subir la imagen");
+          }
+        }
         toast.success("Producto actualizado");
         onRefresh();
       } else {
@@ -266,11 +313,27 @@ function ProductsPanel({
     }
     const res = await mutations.createProduct(values);
     if (res) {
+      if (imageFile && res.id) {
+        const img = await mutations.uploadProductImage(res.id, imageFile);
+        if (!img) {
+          toast.error(mutations.error?.message ?? "No se pudo subir la imagen");
+        }
+      }
       toast.success("Producto creado");
       onRefresh();
     } else {
       toast.error(mutations.error?.message ?? "No se pudo crear el producto");
     }
+    return !!res;
+  };
+
+  const handleRemoveImage = async () => {
+    if (!editing) return false;
+    setRemovingImage(true);
+    const res = await mutations.deleteProductImage(editing.id);
+    setRemovingImage(false);
+    if (res) onRefresh();
+    else toast.error(mutations.error?.message ?? "No se pudo quitar la imagen");
     return !!res;
   };
 
@@ -287,6 +350,21 @@ function ProductsPanel({
   };
 
   const columns: Column<CatalogResponse>[] = [
+    {
+      key: "image",
+      header: "",
+      render: (p) => (
+        <div className="h-10 w-10 overflow-hidden rounded-md bg-surface-container-highest ring-1 ring-outline-variant">
+          {p.imageUrl ? (
+            <img src={p.imageUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="grid h-full w-full place-items-center text-on-surface-variant">
+              <Icon name="medication" size="sm" />
+            </div>
+          )}
+        </div>
+      ),
+    },
     { key: "name", header: "Nombre", render: (p) => p.name },
     {
       key: "ingredient",
@@ -360,6 +438,8 @@ function ProductsPanel({
         initial={editing}
         loading={mutations.loading}
         errorMessage={mutations.error?.message}
+        removingImage={removingImage}
+        onRemoveImage={handleRemoveImage}
       />
       <ConfirmDialog
         open={!!deleting}

@@ -13,6 +13,7 @@ export interface OfficeResponse {
   openingHours: string;
   latitude: number | null;
   longitude: number | null;
+  imageUrl: string | null;
 }
 
 export interface CatalogResponse {
@@ -22,6 +23,7 @@ export interface CatalogResponse {
   activeIngredient: string;
   presentation: string;
   productionArea: string;
+  imageUrl: string | null;
 }
 
 export interface ProductRequest {

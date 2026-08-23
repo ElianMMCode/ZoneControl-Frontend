@@ -2,7 +2,9 @@ import { useCallback, useState } from "react";
 import { apiFetch, isApiError } from "@/lib/api";
 import type {
   ApiError,
+  CatalogResponse,
   OfficeRequest,
+  OfficeResponse,
   ProductRequest,
 } from "@/types";
 
@@ -134,6 +136,74 @@ export function useContentMutations() {
     }
   }, []);
 
+  const uploadProductImage = useCallback(async (id: string, file: File) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      return await apiFetch<CatalogResponse>(
+        `/api/admin/contenido-publico/productos/${id}/imagen`,
+        { method: "POST", body: fd },
+      );
+    } catch (e) {
+      if (isApiError(e)) setError(e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const deleteProductImage = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      return await apiFetch<CatalogResponse>(
+        `/api/admin/contenido-publico/productos/${id}/imagen`,
+        { method: "DELETE" },
+      );
+    } catch (e) {
+      if (isApiError(e)) setError(e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const uploadOfficeImage = useCallback(async (id: string, file: File) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      return await apiFetch<OfficeResponse>(
+        `/api/admin/contenido-publico/sedes/${id}/imagen`,
+        { method: "POST", body: fd },
+      );
+    } catch (e) {
+      if (isApiError(e)) setError(e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const deleteOfficeImage = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      return await apiFetch<OfficeResponse>(
+        `/api/admin/contenido-publico/sedes/${id}/imagen`,
+        { method: "DELETE" },
+      );
+    } catch (e) {
+      if (isApiError(e)) setError(e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const uploadBrochure = useCallback(async (file: File) => {
     setLoading(true);
     setError(null);
@@ -175,9 +245,13 @@ export function useContentMutations() {
     createOffice,
     updateOffice,
     deleteOffice,
+    uploadOfficeImage,
+    deleteOfficeImage,
     createProduct,
     updateProduct,
     deleteProduct,
+    uploadProductImage,
+    deleteProductImage,
     uploadBrochure,
     deleteBrochure,
     loading,
