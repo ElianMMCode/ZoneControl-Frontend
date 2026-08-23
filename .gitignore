@@ -1,3 +1,11 @@
 node_modules/
 dist/
+.pnpm-store/
+*.log
 *.local
+
+# Bloqueo defensivo: nunca deben aparecer lockfiles distintos a pnpm-lock.yaml
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+pnpm-lock.yaml.bak

@@ -26,8 +26,7 @@ export default defineConfig({
     },
   },
   build: {
-    // Ruta static de spring boot
-    outDir: "../resources/static/",
+    outDir: "dist",
     emptyOutDir: true,
   },
 });
