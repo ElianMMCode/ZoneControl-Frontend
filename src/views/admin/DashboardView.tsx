@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
 import { QuickActions } from "@/components/common/QuickActions";
@@ -7,19 +6,15 @@ import { ErrorState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { useResource } from "@/hooks/useResource";
-import { useAuth } from "@/hooks/useAuth";
-import { userListQuery } from "@/hooks/useUsers";
-import { PendingUsersPanel } from "@/components/domain/PendingUsersPanel";
-import { RecentActivityList } from "@/components/domain/RecentActivityList";
 import { CandidateEmployeesPanel } from "@/components/domain/CandidateEmployeesPanel";
 import { SecurityAlertsPanel } from "@/components/domain/SecurityAlertsPanel";
+import { RecentActivityList } from "@/components/domain/RecentActivityList";
 import { formatNumber } from "@/lib/format";
 import type {
   AccessHistoryResponse,
   AdminStatsResponse,
   EmployeeSearchResponse,
   Page,
-  UserResponse,
 } from "@/types";
 
 function todayIso(): string {
@@ -32,15 +27,7 @@ function percent(value: number, total: number): number {
 }
 
 export function AdminDashboard() {
-  const { user: currentUser } = useAuth();
   const stats = useResource<AdminStatsResponse>("/api/admin/stats");
-
-  const pendingQuery = useMemo(() => userListQuery({ pendientesConfiguracion: true, size: 20 }), []);
-  const pendingUsers = useResource<Page<UserResponse>>(
-    "/api/admin/users",
-    pendingQuery,
-    [pendingQuery.pendientesConfiguracion, pendingQuery.size],
-  );
 
   const candidates = useResource<Page<EmployeeSearchResponse>>(
     "/api/admin/users/candidatos",
@@ -56,7 +43,6 @@ export function AdminDashboard() {
 
   const refreshAll = () => {
     stats.refresh();
-    pendingUsers.refresh();
     candidates.refresh();
     history.refresh();
   };
@@ -103,11 +89,11 @@ export function AdminDashboard() {
             icon="vpn_key"
           />
           <StatCard
-            label="Pendientes de configuración"
-            value={formatNumber(stats.data.usuariosSinConfiguracion)}
-            delta="Requieren activar su cuenta"
+            label="Empleados pendientes de configuración"
+            value={formatNumber(candidates.data?.totalElements ?? 0)}
+            delta="Sin cuenta de sistema"
             icon="pending_actions"
-            tone={stats.data.usuariosSinConfiguracion > 0 ? "error" : "primary"}
+            tone={candidates.data && candidates.data.totalElements > 0 ? "error" : "primary"}
           />
         </div>
       ) : null}
@@ -133,22 +119,12 @@ export function AdminDashboard() {
         onRefresh={candidates.refresh}
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <PendingUsersPanel
-          users={pendingUsers.data?.content ?? []}
-          loading={pendingUsers.loading}
-          error={pendingUsers.error ? { message: pendingUsers.error.message } : null}
-          onRefresh={pendingUsers.refresh}
-          onResolved={pendingUsers.refresh}
-          currentUserId={currentUser?.id}
-        />
-        <RecentActivityList
-          events={history.data?.content ?? []}
-          loading={history.loading}
-          error={history.error ? { message: history.error.message } : null}
-          onRefresh={history.refresh}
-        />
-      </div>
+      <RecentActivityList
+        events={history.data?.content ?? []}
+        loading={history.loading}
+        error={history.error ? { message: history.error.message } : null}
+        onRefresh={history.refresh}
+      />
     </div>
   );
 }

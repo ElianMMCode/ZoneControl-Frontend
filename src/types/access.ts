@@ -46,7 +46,7 @@ export interface AreaOccupancy {
 
 export interface AccessAlertDto {
   id: string;
-  tipo: "DENEGACIONES_REPETIDAS" | "ZONA_EMERGENCIA";
+  tipo: "DENEGACIONES_REPETIDAS" | "ZONA_EMERGENCIA" | "INTENTOS_REPETIDOS_ZONA";
   severidad: "LOW" | "MEDIUM" | "HIGH";
   employeeCode: string | null;
   /** true si el empleado involucrado tenía cuenta de sistema al generarse la alerta. */

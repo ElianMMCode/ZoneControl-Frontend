@@ -13,6 +13,7 @@ import type { AccessAlertDto } from "@/types";
 const tipoLabel: Record<AccessAlertDto["tipo"], string> = {
   DENEGACIONES_REPETIDAS: "Denegaciones repetidas",
   ZONA_EMERGENCIA: "Emergencia de zona",
+  INTENTOS_REPETIDOS_ZONA: "Intentos repetidos en zona",
 };
 
 const severidadTone: Record<AccessAlertDto["severidad"], "error" | "warning" | "info"> = {
@@ -35,6 +36,7 @@ const severidadIconClass: Record<AccessAlertDto["severidad"], string> = {
 
 function alertIcon(tipo: AccessAlertDto["tipo"]): string {
   if (tipo === "ZONA_EMERGENCIA") return "emergency";
+  if (tipo === "INTENTOS_REPETIDOS_ZONA") return "siren";
   return "warning";
 }
 

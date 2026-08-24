@@ -50,10 +50,6 @@ export function UsersView() {
     "/api/admin/users/candidatos",
     { size: 1, page: 0 },
   );
-  const pendingUsersResumen = useResource<Page<UserResponse>>(
-    "/api/admin/users",
-    userListQuery({ pendientesConfiguracion: true, size: 1 }),
-  );
 
   const [editing, setEditing] = useState<UserResponse | null>(null);
   const [toggling, setToggling] = useState<UserResponse | null>(null);
@@ -81,14 +77,14 @@ export function UsersView() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {candidates.loading ? (
           <Skeleton className="h-28 w-full rounded-lg" />
         ) : (
           <StatCard
-            label="Pendientes de activación de usuario"
+            label="Empleados pendientes de configuración"
             value={formatNumber(candidates.data?.totalElements ?? 0)}
-            delta="Empleados sin cuenta de sistema"
+            delta="Sin cuenta de sistema"
             icon="pending_actions"
             tone={candidates.data && candidates.data.totalElements > 0 ? "secondary" : "primary"}
           />
@@ -101,17 +97,6 @@ export function UsersView() {
             icon="group"
           />
         ) : null}
-        {pendingUsersResumen.loading ? (
-          <Skeleton className="h-28 w-full rounded-lg" />
-        ) : (
-          <StatCard
-            label="Sin configuración"
-            value={formatNumber(pendingUsersResumen.data?.totalElements ?? 0)}
-            delta="Requieren completar magic link"
-            icon="key"
-            tone={pendingUsersResumen.data && pendingUsersResumen.data.totalElements > 0 ? "error" : "primary"}
-          />
-        )}
       </div>
 
       <section className="card space-y-4">
