@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { PublicNavbar } from "@/components/public/PublicNavbar";
 import { PublicFooter } from "@/components/public/PublicFooter";
 import { HeroSection } from "@/components/public/HeroSection";
@@ -13,6 +15,14 @@ import { usePublicData } from "@/hooks/usePublicData";
 export function LandingView() {
   const data = usePublicData();
   const { info } = data.institutional ?? {};
+  const location = useLocation();
+
+  // Al llegar con un hash (p. ej. desde /validar), desplaza a la sección
+  // cuando el contenido termina de cargar.
+  useEffect(() => {
+    if (!location.hash || data.loading) return;
+    document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+  }, [location.hash, data.loading]);
 
   return (
     <div className="min-h-screen bg-public-surface text-public-on-surface">

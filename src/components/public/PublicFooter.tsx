@@ -30,10 +30,10 @@ export function PublicFooter() {
         <div>
           <h3 className="label-caps text-public-on-surface">Enlaces</h3>
           <ul className="mt-3 space-y-1 text-body-sm">
-            <li><a href="#quienes-somos" className="text-public-on-surface-variant hover:text-public-primary">Quiénes Somos</a></li>
-            <li><a href="#catalogo" className="text-public-on-surface-variant hover:text-public-primary">Catálogo</a></li>
-            <li><a href="#sedes" className="text-public-on-surface-variant hover:text-public-primary">Sedes</a></li>
-            <li><a href="#contacto" className="text-public-on-surface-variant hover:text-public-primary">Contacto</a></li>
+            <li><Link to="/#quienes-somos" className="text-public-on-surface-variant hover:text-public-primary">Quiénes Somos</Link></li>
+            <li><Link to="/#catalogo" className="text-public-on-surface-variant hover:text-public-primary">Catálogo</Link></li>
+            <li><Link to="/#sedes" className="text-public-on-surface-variant hover:text-public-primary">Sedes</Link></li>
+            <li><Link to="/#contacto" className="text-public-on-surface-variant hover:text-public-primary">Contacto</Link></li>
           </ul>
         </div>
         <div>
