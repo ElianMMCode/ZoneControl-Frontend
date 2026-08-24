@@ -54,12 +54,12 @@ export function ValidateAccessView() {
       return;
     }
     if (!employeeCode.trim()) {
-      toast.error("Ingresa el código del empleado");
+      toast.error("Ingresa tu número de empleado");
       return;
     }
     setSubmitting(true);
     setResult(null);
-    const body = { employeeCode: employeeCode.trim(), productionAreaName: selectedZone.name };
+    const body = { employeeCode: `EMP-${employeeCode.trim()}`, productionAreaName: selectedZone.name };
     try {
       const res =
         mode === "entrada"
@@ -89,8 +89,9 @@ export function ValidateAccessView() {
           </p>
         </header>
 
-        <section className="mb-10">
-          <h2 className="label-caps mb-3">1. Selecciona tu zona</h2>
+        {!selectedZone ? (
+          <section>
+            <h2 className="label-caps mb-3">1. Selecciona tu zona</h2>
           {zones.loading ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-lg" />)}
@@ -102,22 +103,16 @@ export function ValidateAccessView() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {zones.data.map((z) => {
-                const selected = selectedZone?.name === z.name;
                 return (
                   <button
                     key={z.name}
                     type="button"
                     onClick={() => { setSelectedZone(z); setResult(null); }}
-                    aria-pressed={selected}
-                    className={`rounded-lg border p-5 text-left transition-colors ${
-                      selected
-                        ? "border-primary bg-primary-container/30 ring-2 ring-primary"
-                        : "border-outline-variant bg-public-surface hover:border-primary/40"
-                    }`}
+                    className="rounded-lg border border-outline-variant bg-public-surface p-5 text-left transition-colors hover:border-primary/40"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="flex items-center gap-2 font-semibold text-public-on-surface">
-                        <Icon name={selected ? "check_box" : "check_box_outline_blank"} size="sm" />
+                        <Icon name="door_front" size="sm" />
                         {z.name}
                       </span>
                       {z.emergencyClosed && <Badge tone="error">Emergencia</Badge>}
@@ -131,10 +126,20 @@ export function ValidateAccessView() {
             </div>
           )}
         </section>
+        ) : null}
 
         {selectedZone ? (
           <section className="mx-auto max-w-[720px] space-y-6">
-            <h2 className="label-caps">2. Registra tu {mode} en {selectedZone.name}</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="label-caps">Registra tu {mode} en {selectedZone.name}</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setSelectedZone(null); setResult(null); setEmployeeCode(""); }}
+              >
+                <Icon name="arrow_back" size="sm" /> Volver a zonas
+              </Button>
+            </div>
             <div className="card space-y-4">
               <Tabs
                 items={MODE_ITEMS}
@@ -142,17 +147,23 @@ export function ValidateAccessView() {
                 onChange={(id) => { setMode(id as Mode); setResult(null); }}
               />
               <form onSubmit={onSubmit} className="space-y-4" noValidate>
-                <FormField id="kiosk-code" label="Código de empleado" required>
-                  <input
-                    id="kiosk-code"
-                    className="input font-mono text-lg"
-                    value={employeeCode}
-                    onChange={(e) => setEmployeeCode(e.target.value)}
-                    placeholder="EMP-000001"
-                    maxLength={20}
-                    autoComplete="off"
-                    autoFocus
-                  />
+                <FormField id="kiosk-code" label="Número de empleado" required>
+                  <div className="flex items-stretch">
+                    <span className="grid place-items-center rounded-l-md border border-r-0 border-outline-variant bg-surface-container px-3 font-mono text-lg text-on-surface-variant">
+                      EMP-
+                    </span>
+                    <input
+                      id="kiosk-code"
+                      className="input font-mono text-lg rounded-l-none"
+                      value={employeeCode}
+                      onChange={(e) => setEmployeeCode(e.target.value.replace(/\D/g, ""))}
+                      placeholder="000001"
+                      maxLength={10}
+                      inputMode="numeric"
+                      autoComplete="off"
+                      autoFocus
+                    />
+                  </div>
                 </FormField>
                 <Button type="submit" size="lg" loading={submitting} className="w-full">
                   {submitting ? <Spinner /> : <Icon name={mode === "entrada" ? "login" : "logout"} size="sm" />}
