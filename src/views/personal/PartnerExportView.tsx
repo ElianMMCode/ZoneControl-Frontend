@@ -1,12 +1,12 @@
 import { PageHeader } from "@/components/common/PageHeader";
 import { PartnerPeriodicSection } from "@/components/common/PartnerPeriodicSection";
 
-export function ReportsView() {
+export function PartnerExportView() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Reportes de Auditoría"
-        subtitle="Archivo periódico de actividad para el socio internacional"
+        title="Archivo para el Socio Internacional"
+        subtitle="Generación y envío del archivo periódico de actividad de accesos"
       />
       <PartnerPeriodicSection />
     </div>

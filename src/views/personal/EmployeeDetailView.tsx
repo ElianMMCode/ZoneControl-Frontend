@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { FormField } from "@/components/ui/Input";
 import { Select, Option } from "@/components/ui/Select";
 import { useResource } from "@/hooks/useResource";
+import { useAuth } from "@/hooks/useAuth";
 import { apiFetch, isApiError } from "@/lib/api";
 import {
   useAreas,
@@ -73,6 +74,7 @@ export function EmployeeDetailView() {
   const permissions = useEmployeePermissions(id ?? null);
   const history = useEmployeeAccessHistory(id ?? null, 20);
   const { uploadPhoto, deletePhoto, update } = useEmployeeMutations();
+  const { token } = useAuth();
   const {
     create: createPermission,
     update: updatePermission,
@@ -82,9 +84,11 @@ export function EmployeeDetailView() {
   } = usePermissionMutations();
   const areas = useAreas();
 
-  const photoUrl = employee.data?.photoUrl
-    ? `${employee.data.photoUrl}?t=${photoTick}`
-    : `/api/personal/${id}/photo?t=${photoTick}`;
+  // <img> no puede enviar headers; siempre se sirve por la API con el
+  // token como query param (soportado por el backend solo para este endpoint).
+  const photoSrc = id
+    ? `/api/personal/${id}/photo?t=${photoTick}&token=${encodeURIComponent(token ?? "")}`
+    : null;
 
   const onPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -248,7 +252,7 @@ export function EmployeeDetailView() {
           <div className="flex flex-col items-center gap-2">
             <div className="grid h-32 w-32 place-items-center overflow-hidden rounded-full bg-surface-container-highest ring-1 ring-outline-variant">
               <img
-                src={photoUrl}
+                src={photoSrc ?? undefined}
                 alt={`Foto de ${e.firstName}`}
                 className="h-full w-full object-cover"
                 onError={(ev) => {

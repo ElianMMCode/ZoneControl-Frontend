@@ -15,10 +15,9 @@ import { Pagination } from "@/components/common/Pagination";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { SecurityAlertsPanel } from "@/components/domain/SecurityAlertsPanel";
-import { Badge } from "@/components/ui/Badge";
+import { PartnerPeriodicSection } from "@/components/common/PartnerPeriodicSection";
 import { useDepartments, useAreas } from "@/hooks/useGestor";
 import { useResource } from "@/hooks/useResource";
-import { useZoneStream, type ValidatedEvent } from "@/hooks/useZoneStream";
 import { apiDownload, isApiError } from "@/lib/api";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import type {
@@ -43,7 +42,6 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 export function AccessHistoryView() {
-  const stream = useZoneStream();
   const [fechaInicio, setFechaInicio] = useState(iso(thirtyDaysAgo));
   const [fechaFin, setFechaFin] = useState(iso(today));
   const [employeeCode, setEmployeeCode] = useState("");
@@ -132,82 +130,14 @@ export function AccessHistoryView() {
     },
   ];
 
-  const liveColumns: Column<ValidatedEvent>[] = [
-    { key: "ts", header: "Hora", render: (e) => formatDateTime(e.timestamp) },
-    { key: "code", header: "Código", render: (e) => e.employeeCode },
-    {
-      key: "emp",
-      header: "Empleado",
-      render: (e) =>
-        e.employeeId ? (
-          <Link
-            to={`/personal/${e.employeeId}`}
-            className="font-medium text-primary hover:underline"
-          >
-            {e.employeeName ?? "—"}
-          </Link>
-        ) : (
-          e.employeeName ?? "—"
-        ),
-    },
-    { key: "area", header: "Área", render: (e) => e.area },
-    {
-      key: "result",
-      header: "Resultado",
-      render: (e) => (
-        <div className="flex items-center gap-2">
-          <StatusPill status={e.result} />
-          <span className="text-body-sm text-on-surface-variant">{e.message}</span>
-        </div>
-      ),
-    },
-    {
-      key: "actions",
-      header: "",
-      align: "right",
-      render: (e) =>
-        e.employeeId ? (
-          <Tooltip label="Ver detalle del empleado">
-            <Link to={`/personal/${e.employeeId}`}>
-              <Button variant="ghost" size="sm" aria-label="Ver detalle del empleado">
-                <Icon name="person" size="sm" />
-              </Button>
-            </Link>
-          </Tooltip>
-        ) : null,
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <PageHeader
         title="Historial de Accesos"
-        subtitle="Registro detallado de entradas y salidas, eventos en tiempo real y alertas de seguridad"
-        actions={
-          <Badge tone={stream.connected ? "active" : "error"}>
-            <Icon name={stream.connected ? "sensors" : "sensors_off"} size="sm" />
-            {stream.connected ? "En vivo" : stream.error ? "Sin conexión" : "Conectando…"}
-          </Badge>
-        }
+        subtitle="Registro detallado de entradas y salidas, alertas y archivo para el socio internacional"
       />
 
-      <section className="card space-y-4">
-        <header className="card-header">
-          <h2 className="text-heading-md">Movimientos recientes</h2>
-          <span className="label-caps">TIEMPO REAL</span>
-        </header>
-        {stream.validations.length === 0 ? (
-          <p className="text-body-sm text-on-surface-variant">
-            Esperando eventos del sistema de control de acceso…
-          </p>
-        ) : (
-          <DataTable
-            columns={liveColumns}
-            data={stream.validations}
-            rowKey={(e) => `${e.timestamp}-${e.employeeCode}-${e.area}`}
-          />
-        )}
-      </section>
+      <SecurityAlertsPanel />
 
       {stats.loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -312,7 +242,7 @@ export function AccessHistoryView() {
         )}
       </section>
 
-      <SecurityAlertsPanel />
+      <PartnerPeriodicSection />
     </div>
   );
 }

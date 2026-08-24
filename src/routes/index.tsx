@@ -18,6 +18,7 @@ import { BulkUploadView } from "@/views/personal/BulkUploadView";
 import { EmployeeDetailView } from "@/views/personal/EmployeeDetailView";
 import { PermissionsView } from "@/views/personal/PermissionsView";
 import { AccessHistoryView } from "@/views/personal/AccessHistoryView";
+import { PartnerExportView } from "@/views/personal/PartnerExportView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
 import { AccessValidationView } from "@/views/supervisor/AccessValidationView";
 import { ReportsView } from "@/views/supervisor/ReportsView";
@@ -143,6 +144,15 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
             <AccessHistoryView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/personal/socio",
+        handle: { title: "Archivo para Socio" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <PartnerExportView />
           </RequireRole>
         ),
       },

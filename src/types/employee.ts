@@ -82,7 +82,8 @@ export interface BulkUploadResult {
 
 export interface AccessHistoryRecord {
   id: string;
-  employee: { id: string } | null;
+  employeeCode: string | null;
+  employeeName: string | null;
   department: string | null;
   productionAreaName: string | null;
   timestamp: string;
