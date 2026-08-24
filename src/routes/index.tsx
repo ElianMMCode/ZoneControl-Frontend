@@ -17,6 +17,8 @@ import { RegisterEmployeeView } from "@/views/personal/RegisterEmployeeView";
 import { BulkUploadView } from "@/views/personal/BulkUploadView";
 import { EmployeeDetailView } from "@/views/personal/EmployeeDetailView";
 import { PermissionsView } from "@/views/personal/PermissionsView";
+import { AccessHistoryView } from "@/views/personal/AccessHistoryView";
+import { LiveEventsView } from "@/views/personal/LiveEventsView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
 import { AccessValidationView } from "@/views/supervisor/AccessValidationView";
 import { ReportsView } from "@/views/supervisor/ReportsView";
@@ -133,6 +135,24 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
             <PermissionsView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/personal/historial",
+        handle: { title: "Historial de Accesos" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <AccessHistoryView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "/personal/eventos",
+        handle: { title: "Eventos en Vivo" } satisfies RouteHandle,
+        element: (
+          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+            <LiveEventsView />
           </RequireRole>
         ),
       },
