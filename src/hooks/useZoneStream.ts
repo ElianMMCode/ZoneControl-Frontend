@@ -19,6 +19,7 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
 function toValidatedEvent(h: AccessHistoryResponse): ValidatedEvent {
   return {
     type: "access.validated",
+    employeeId: h.employeeId,
     employeeCode: h.employeeCode ?? "N/A",
     employeeName: h.employeeName ?? null,
     area: h.productionAreaName,

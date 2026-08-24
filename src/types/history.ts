@@ -2,6 +2,7 @@ import type { AccessResult, ReportFormat } from "./common";
 
 export interface AccessHistoryResponse {
   id: string;
+  employeeId: string | null;
   employeeCode: string | null;
   employeeName: string | null;
   position: string | null;

@@ -57,7 +57,7 @@ export interface AccessAlertDto {
 
 export type RealtimeEvent =
   | { type: "snapshot"; zones: ZoneSnapshot[]; occupancy: AreaOccupancy[] }
-  | { type: "access.validated"; employeeCode: string; employeeName?: string | null; area: string; result: AccessResult; message: string; timestamp: string }
+  | { type: "access.validated"; employeeId?: string | null; employeeCode: string; employeeName?: string | null; area: string; result: AccessResult; message: string; timestamp: string }
   | { type: "occupancy.updated"; timestamp: string }
   | { type: "zone.updated"; area: string; emergencyClosed: boolean }
   | { type: "alert.created"; alert: AccessAlertDto };
