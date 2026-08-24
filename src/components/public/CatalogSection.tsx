@@ -59,11 +59,13 @@ function ProductCarousel({ products }: { products: CatalogResponse[] }) {
     <div className="group/carousel relative">
       <div
         ref={trackRef}
-        className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
+        <div className="mx-auto flex w-max snap-x snap-mandatory gap-5">
+          {products.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
       </div>
       <button
         type="button"
