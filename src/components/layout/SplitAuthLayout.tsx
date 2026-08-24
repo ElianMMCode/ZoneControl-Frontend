@@ -16,7 +16,7 @@ export function SplitAuthLayout({ children }: { children?: ReactNode }) {
         </div>
         <section className="flex flex-col px-6 py-6 md:px-10 md:py-8">
           <header className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 text-body-md font-bold text-public-on-surface">
+            <Link to="/#inicio" className="flex items-center gap-2 text-body-md font-bold text-public-on-surface">
               <span className="grid h-9 w-9 place-items-center rounded-md bg-public-primary text-public-on-primary">
                 <Icon name="verified_user" size="md" />
               </span>

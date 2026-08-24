@@ -32,7 +32,7 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-10 border-b border-outline-variant/50 bg-surface-container-lowest/80 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-[1280px] items-center gap-6 px-6">
-        <Link to="/" className="flex items-center gap-2 text-body-md font-bold text-public-on-surface">
+        <Link to="/#inicio" className="flex items-center gap-2 text-body-md font-bold text-public-on-surface">
           <span className="grid h-10 w-10 place-items-center rounded-md bg-public-primary text-public-on-primary">
             <Icon name="verified_user" size="md" />
           </span>
