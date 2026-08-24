@@ -206,10 +206,6 @@ export function ValidateAccessView() {
                   </dl>
                 </div>
               ) : null}
-
-              <p className="text-body-sm text-on-surface-variant">
-                Cada intento queda registrado en el historial de accesos con marca de tiempo, independientemente del resultado.
-              </p>
             </div>
           </section>
         ) : null}
