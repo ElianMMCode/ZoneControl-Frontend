@@ -87,11 +87,6 @@ export function ValidateAccessView() {
           <p className="mt-2 text-body-md text-public-on-surface-variant">
             Selecciona tu zona y registra tu entrada o salida con el código de empleado.
           </p>
-          <div className="mt-3 flex items-center justify-center gap-2">
-            <Badge tone="info">
-              <Icon name="self_improvement" size="sm" /> Modo autoservicio · sin inicio de sesión
-            </Badge>
-          </div>
         </header>
 
         <section className="mb-10">
