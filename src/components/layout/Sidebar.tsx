@@ -24,7 +24,6 @@ const items: Item[] = [
   { to: "/personal/carga-masiva", label: "Carga Masiva", icon: "upload_file", roles: ["GESTOR_PERSONAL"] },
   { to: "/permisos", label: "Permisos", icon: "vpn_key", roles: ["GESTOR_PERSONAL"] },
   { to: "/personal/historial", label: "Historial de Accesos", icon: "history", roles: ["ADMIN", "GESTOR_PERSONAL"] },
-  { to: "/personal/socio", label: "Archivo para Socio", icon: "send", roles: ["ADMIN", "GESTOR_PERSONAL"] },
   { to: "/supervisor", label: "Panel Supervisión", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"], end: true },
   { to: "/supervisor/zones", label: "Zonas", icon: "location_on", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/reportes", label: "Reportes", icon: "summarize", roles: ["ADMIN", "SUPERVISOR_AUDITOR"] },
