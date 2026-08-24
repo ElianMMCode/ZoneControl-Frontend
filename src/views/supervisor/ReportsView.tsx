@@ -299,7 +299,6 @@ export function ReportsView() {
       <section className="card space-y-4">
         <header className="card-header">
           <h2 className="text-heading-md">Archivo periódico para socios</h2>
-          <span className="label-caps">HU-17</span>
         </header>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
           <FormField id="mes" label="Mes" required>

@@ -4,7 +4,7 @@ export interface PeriodicReportRequest {
   mes: number;
   anio: number;
   formato: ReportFormat;
-  /** Filtro opcional por departamentos (HU-17). Si es vacío se incluyen todos. */
+  /** Filtro opcional por departamentos (HU-16). Si es vacío se incluyen todos. */
   departmentNames?: string[];
 }
 
