@@ -21,7 +21,6 @@ import { EmployeeDetailView } from "@/views/personal/EmployeeDetailView";
 import { PermissionsView } from "@/views/personal/PermissionsView";
 import { AccessHistoryView } from "@/views/personal/AccessHistoryView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
-import { ReportsView } from "@/views/supervisor/ReportsView";
 import { ZonesView } from "@/views/supervisor/ZonesView";
 import { RoleMatrixView } from "@/views/admin/RoleMatrixView";
 import { SettingsView } from "@/views/settings/SettingsView";
@@ -148,7 +147,7 @@ const router = createBrowserRouter([
         path: "/personal/historial",
         handle: { title: "Historial de Accesos" } satisfies RouteHandle,
         element: (
-          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL"] as ReadonlyArray<Role>}>
+          <RequireRole roles={["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
             <AccessHistoryView />
           </RequireRole>
         ),
@@ -186,15 +185,6 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
             <SupervisorDashboard />
-          </RequireRole>
-        ),
-      },
-      {
-        path: "/supervisor/reportes",
-        handle: { title: "Reportes de Auditoría" } satisfies RouteHandle,
-        element: (
-          <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
-            <ReportsView />
           </RequireRole>
         ),
       },

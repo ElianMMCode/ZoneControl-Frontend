@@ -23,10 +23,9 @@ const items: Item[] = [
   { to: "/personal/nuevo", label: "Registrar Personal", icon: "person_add", roles: ["GESTOR_PERSONAL"] },
   { to: "/personal/carga-masiva", label: "Carga Masiva", icon: "upload_file", roles: ["GESTOR_PERSONAL"] },
   { to: "/permisos", label: "Permisos", icon: "vpn_key", roles: ["GESTOR_PERSONAL"] },
-  { to: "/personal/historial", label: "Historial de Accesos", icon: "history", roles: ["ADMIN", "GESTOR_PERSONAL"] },
+  { to: "/personal/historial", label: "Historial de Accesos", icon: "history", roles: ["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"] },
   { to: "/supervisor", label: "Panel Supervisión", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"], end: true },
   { to: "/supervisor/zones", label: "Zonas", icon: "location_on", roles: ["SUPERVISOR_AUDITOR"] },
-  { to: "/supervisor/reportes", label: "Reportes", icon: "summarize", roles: ["ADMIN", "SUPERVISOR_AUDITOR"] },
 ];
 
 export function Sidebar({ role }: { role: Role | null }) {

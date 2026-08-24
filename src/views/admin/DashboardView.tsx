@@ -106,7 +106,7 @@ export function AdminDashboard() {
           { label: "Áreas de producción", icon: "domain", to: "/admin/areas" },
           { label: "Cargos", icon: "badge", to: "/admin/cargos" },
           { label: "Matriz de roles", icon: "verified_user", to: "/admin/matriz-roles" },
-          { label: "Exportar historial", icon: "summarize", to: "/supervisor/reportes" },
+          { label: "Exportar historial", icon: "summarize", to: "/personal/historial" },
         ]}
       />
 

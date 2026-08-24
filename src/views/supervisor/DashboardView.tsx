@@ -55,7 +55,7 @@ export function SupervisorDashboard() {
         actions={[
           { label: "Validar acceso", icon: "qr_code_scanner", to: "/validar" },
           { label: "Zonas en vivo", icon: "location_on", to: "/supervisor/zones" },
-          { label: "Reportes / Historial", icon: "summarize", to: "/supervisor/reportes" },
+          { label: "Historial de accesos", icon: "summarize", to: "/personal/historial" },
         ]}
       />
 
