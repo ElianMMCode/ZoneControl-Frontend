@@ -27,7 +27,6 @@ const items: Item[] = [
   { to: "/personal/historial", label: "Historial de Accesos", icon: "history", roles: ["ADMIN", "GESTOR_PERSONAL"] },
   { to: "/personal/socio", label: "Archivo para Socio", icon: "send", roles: ["ADMIN", "GESTOR_PERSONAL"] },
   { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"], end: true },
-  { to: "/supervisor/validar", label: "Validar Credencial", icon: "verified_user", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/zones", label: "Zonas", icon: "location_on", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/reportes", label: "Reportes", icon: "summarize", roles: ["ADMIN", "SUPERVISOR_AUDITOR"] },
   { to: "/ajustes", label: "Ajustes", icon: "settings", roles: ["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"] },

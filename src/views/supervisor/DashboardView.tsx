@@ -53,7 +53,7 @@ export function SupervisorDashboard() {
 
       <QuickActions
         actions={[
-          { label: "Validar credencial", icon: "verified_user", to: "/supervisor/validar" },
+          { label: "Validar acceso", icon: "qr_code_scanner", to: "/validar" },
           { label: "Zonas en vivo", icon: "location_on", to: "/supervisor/zones" },
           { label: "Reportes / Historial", icon: "summarize", to: "/supervisor/reportes" },
         ]}

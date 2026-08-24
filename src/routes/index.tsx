@@ -6,6 +6,7 @@ import { RequireAuth, RequireRole } from "./guards";
 import { LoginView } from "@/views/auth/LoginView";
 import { SetupPasswordView } from "@/views/auth/SetupPasswordView";
 import { LandingView } from "@/views/public/LandingView";
+import { ValidateAccessView } from "@/views/public/ValidateAccessView";
 import { AdminDashboard } from "@/views/admin/DashboardView";
 import { UsersView } from "@/views/admin/UsersView";
 import { CreateUserView } from "@/views/admin/CreateUserView";
@@ -20,7 +21,6 @@ import { PermissionsView } from "@/views/personal/PermissionsView";
 import { AccessHistoryView } from "@/views/personal/AccessHistoryView";
 import { PartnerExportView } from "@/views/personal/PartnerExportView";
 import { SupervisorDashboard } from "@/views/supervisor/DashboardView";
-import { AccessValidationView } from "@/views/supervisor/AccessValidationView";
 import { ReportsView } from "@/views/supervisor/ReportsView";
 import { ZonesView } from "@/views/supervisor/ZonesView";
 import { RoleMatrixView } from "@/views/admin/RoleMatrixView";
@@ -47,6 +47,7 @@ function ShellWithTitle() {
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingView /> },
+  { path: "/validar", element: <ValidateAccessView /> },
   {
     element: <AuthLayout />,
     children: [
@@ -189,15 +190,6 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={["SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
             <SupervisorDashboard />
-          </RequireRole>
-        ),
-      },
-      {
-        path: "/supervisor/validar",
-        handle: { title: "Validación de Credenciales" } satisfies RouteHandle,
-        element: (
-          <RequireRole roles={["ADMIN", "SUPERVISOR_AUDITOR"] as ReadonlyArray<Role>}>
-            <AccessValidationView />
           </RequireRole>
         ),
       },
