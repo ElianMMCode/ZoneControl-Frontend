@@ -10,6 +10,7 @@ export interface AccessHistoryResponse {
   productionAreaName: string;
   timestamp: string;
   result: AccessResult;
+  hasUser: boolean;
 }
 
 export interface SupervisorStatsResponse {
@@ -30,4 +31,6 @@ export interface ExportRequest {
   employeeCode?: string;
   departamentoName?: string;
   resultado?: AccessResult;
+  /** null/undefined = todos, true = con usuario, false = sin usuario. */
+  conUsuario?: boolean;
 }

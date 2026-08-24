@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { FormField } from "@/components/ui/Input";
 import { Select, Option } from "@/components/ui/Select";
+import { Tabs } from "@/components/ui/Tabs";
 import { Icon } from "@/components/ui/Icon";
 import { Pagination } from "@/components/common/Pagination";
 import { ErrorState, EmptyState } from "@/components/ui/EmptyState";
@@ -32,6 +33,13 @@ const today = new Date();
 const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
+type ConUsuarioTab = "todos" | "con" | "sin";
+const tabToConUsuario: Record<ConUsuarioTab, boolean | undefined> = {
+  todos: undefined,
+  con: true,
+  sin: false,
+};
+
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -48,6 +56,7 @@ export function AccessHistoryView() {
   const [department, setDepartment] = useState("");
   const [area, setArea] = useState("");
   const [resultado, setResultado] = useState<AccessResult | "">("");
+  const [conUsuarioTab, setConUsuarioTab] = useState<ConUsuarioTab>("todos");
   const [page, setPage] = useState(0);
   const [exporting, setExporting] = useState<ReportFormat | null>(null);
 
@@ -62,9 +71,10 @@ export function AccessHistoryView() {
     department: department || undefined,
     productionAreaName: area || undefined,
     resultado: resultado || undefined,
+    conUsuario: tabToConUsuario[conUsuarioTab],
     page,
     size: 10,
-  }, [fechaInicio, fechaFin, employeeCode, department, area, resultado, page]);
+  }, [fechaInicio, fechaFin, employeeCode, department, area, resultado, conUsuarioTab, page]);
 
   const onExport = async (formato: ReportFormat) => {
     setExporting(formato);
@@ -79,6 +89,7 @@ export function AccessHistoryView() {
           departamentoName: department || undefined,
           productionAreaName: area || undefined,
           resultado: resultado || undefined,
+          conUsuario: tabToConUsuario[conUsuarioTab],
         },
       });
       const ext = formato === "CSV" ? "csv" : formato === "EXCEL" ? "xlsx" : "pdf";
@@ -220,6 +231,19 @@ export function AccessHistoryView() {
             </Select>
           </FormField>
         </div>
+
+        <Tabs
+          items={[
+            { id: "todos", label: "Todos" },
+            { id: "con", label: "Con usuario" },
+            { id: "sin", label: "Sin usuario" },
+          ]}
+          value={conUsuarioTab}
+          onChange={(id) => {
+            setConUsuarioTab(id as ConUsuarioTab);
+            setPage(0);
+          }}
+        />
 
         {history.loading ? (
           <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>

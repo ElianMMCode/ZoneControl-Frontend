@@ -49,6 +49,8 @@ export interface AccessAlertDto {
   tipo: "DENEGACIONES_REPETIDAS" | "ZONA_EMERGENCIA";
   severidad: "LOW" | "MEDIUM" | "HIGH";
   employeeCode: string | null;
+  /** true si el empleado involucrado tenía cuenta de sistema al generarse la alerta. */
+  hasUser: boolean;
   productionAreaName: string | null;
   message: string;
   timestamp: string;

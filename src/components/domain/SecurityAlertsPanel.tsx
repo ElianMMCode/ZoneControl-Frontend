@@ -38,6 +38,60 @@ function alertIcon(tipo: AccessAlertDto["tipo"]): string {
   return "warning";
 }
 
+type AlertListProps = {
+  title: string;
+  subtitle: string;
+  icon: string;
+  tone: string;
+  items: AccessAlertDto[];
+  marking: string | null;
+  onMarkRead: (id: string) => void;
+};
+
+function AlertSection({ title, subtitle, icon, tone, items, marking, onMarkRead }: AlertListProps) {
+  if (items.length === 0) return null;
+  return (
+    <div>
+      <div className="flex items-center gap-2 py-3">
+        <span className={`grid h-7 w-7 place-items-center rounded-full ${tone}`}>
+          <Icon name={icon} size="sm" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-body-sm font-bold text-on-surface">{title}</h3>
+          <p className="text-body-sm text-on-surface-variant">{subtitle}</p>
+        </div>
+        <span className="label-caps ml-auto">{items.length} ALERTA{items.length === 1 ? "" : "S"}</span>
+      </div>
+      <ul className="divide-y divide-outline-variant border-t border-outline-variant/60">
+        {items.map((a) => (
+          <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${severidadIconClass[a.severidad]}`}>
+                <Icon name={alertIcon(a.tipo)} size="sm" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-body-sm font-semibold text-on-surface">{tipoLabel[a.tipo]}</p>
+                  <Badge tone={severidadTone[a.severidad]}>{severidadLabel[a.severidad]}</Badge>
+                </div>
+                <p className="text-body-sm text-on-surface-variant">{a.message}</p>
+                <p className="text-body-sm text-on-surface-variant/70">
+                  {formatDateTime(a.timestamp)}
+                  {a.productionAreaName ? ` · ${a.productionAreaName}` : ""}
+                  {a.employeeCode ? ` · ${a.employeeCode}` : ""}
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="secondary" loading={marking === a.id} onClick={() => onMarkRead(a.id)}>
+              <Icon name="done" size="sm" /> Leída
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function SecurityAlertsPanel() {
   const alerts = useResource<AccessAlertDto[]>("/api/access/alerts", { leido: false });
   const [marking, setMarking] = useState<string | null>(null);
@@ -72,32 +126,26 @@ export function SecurityAlertsPanel() {
       ) : alerts.error ? (
         <ErrorState message={alerts.error.message} onRetry={alerts.refresh} />
       ) : alerts.data && alerts.data.length > 0 ? (
-        <ul className="divide-y divide-outline-variant">
-          {alerts.data.map((a) => (
-            <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-              <div className="flex min-w-0 items-start gap-3">
-                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${severidadIconClass[a.severidad]}`}>
-                  <Icon name={alertIcon(a.tipo)} size="sm" />
-                </span>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-body-sm font-semibold text-on-surface">{tipoLabel[a.tipo]}</p>
-                    <Badge tone={severidadTone[a.severidad]}>{severidadLabel[a.severidad]}</Badge>
-                  </div>
-                  <p className="text-body-sm text-on-surface-variant">{a.message}</p>
-                  <p className="text-body-sm text-on-surface-variant/70">
-                    {formatDateTime(a.timestamp)}
-                    {a.productionAreaName ? ` · ${a.productionAreaName}` : ""}
-                    {a.employeeCode ? ` · ${a.employeeCode}` : ""}
-                  </p>
-                </div>
-              </div>
-              <Button size="sm" variant="secondary" loading={marking === a.id} onClick={() => handleMarkRead(a.id)}>
-                <Icon name="done" size="sm" /> Leída
-              </Button>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-4">
+          <AlertSection
+            title="Con cuenta de sistema"
+            subtitle="Empleados con usuario registrado en la plataforma"
+            icon="manage_accounts"
+            tone="bg-primary-container/30 text-primary"
+            items={alerts.data.filter((a) => a.hasUser)}
+            marking={marking}
+            onMarkRead={handleMarkRead}
+          />
+          <AlertSection
+            title="Sin cuenta de sistema"
+            subtitle="Empleados solo con acceso físico, zonas u orígenes desconocidos"
+            icon="person_off"
+            tone="bg-tertiary-container/40 text-on-tertiary-container"
+            items={alerts.data.filter((a) => !a.hasUser)}
+            marking={marking}
+            onMarkRead={handleMarkRead}
+          />
+        </div>
       ) : (
         <EmptyState title="Sin alertas pendientes" description="No hay anomalías de acceso por revisar." icon="verified" />
       )}
