@@ -190,7 +190,7 @@ export function AccessHistoryView() {
             <input id="fechaFin" type="date" className="input" value={fechaFin} onChange={(e) => { setFechaFin(e.target.value); setPage(0); }} />
           </FormField>
           <FormField id="employeeCode" label="Código de empleado">
-            <input id="employeeCode" className="input font-mono" value={employeeCode} onChange={(e) => { setEmployeeCode(e.target.value); setPage(0); }} placeholder="EMP-000001 o parcial (ej. 0001)" />
+            <input id="employeeCode" className="input font-mono" value={employeeCode} onChange={(e) => { setEmployeeCode(e.target.value); setPage(0); }} placeholder="EMP-000001" />
           </FormField>
           <FormField id="department" label="Departamento">
             <Select id="department" value={department} onChange={(e) => { setDepartment(e.target.value); setPage(0); }} disabled={departments.loading}>
