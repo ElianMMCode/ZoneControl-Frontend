@@ -1,6 +1,7 @@
 import { RouterProvider, createBrowserRouter, useMatches } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthLayout } from "@/components/layout/AuthLayout";
+import { SplitAuthLayout } from "@/components/layout/SplitAuthLayout";
 import { AppShell } from "@/components/layout/AppShell";
 import { RequireAuth, RequireRole } from "./guards";
 import { LoginView } from "@/views/auth/LoginView";
@@ -51,8 +52,13 @@ const router = createBrowserRouter([
   {
     element: <AuthLayout />,
     children: [
-      { path: "/login", element: <LoginView /> },
       { path: "/configurar-contrasena", element: <SetupPasswordView /> },
+    ],
+  },
+  {
+    element: <SplitAuthLayout />,
+    children: [
+      { path: "/login", element: <LoginView /> },
     ],
   },
   {
