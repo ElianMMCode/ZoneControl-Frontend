@@ -3,15 +3,17 @@ import { apiFetch, isApiError } from "@/lib/api";
 import type {
   ApiError,
   CatalogResponse,
+  CategoryResponse,
   ContactResponse,
   InstitutionalResponse,
   OfficeResponse,
 } from "@/types";
 
-const PUBLIC_INSTITUTIONAL = "/api/public/institucional";
+const PUBLIC_INSTITUCIONAL = "/api/public/institucional";
 const PUBLIC_CONTACTO = "/api/public/contacto";
 const PUBLIC_SEDES = "/api/public/sedes";
 const PUBLIC_CATALOGO = "/api/public/catalogo";
+const PUBLIC_CATEGORIAS = "/api/public/catalogo/categorias";
 const PUBLIC_FOLLETO = "/api/public/folleto";
 
 export type BrochureStatus = "unknown" | "available" | "missing";
@@ -45,10 +47,11 @@ function useJsonResource<T>(path: string) {
 }
 
 export function usePublicData() {
-  const institutional = useJsonResource<InstitutionalResponse>(PUBLIC_INSTITUTIONAL);
+  const institutional = useJsonResource<InstitutionalResponse>(PUBLIC_INSTITUCIONAL);
   const contact = useJsonResource<ContactResponse>(PUBLIC_CONTACTO);
   const sedes = useJsonResource<OfficeResponse[]>(PUBLIC_SEDES);
   const catalogo = useJsonResource<CatalogResponse[]>(PUBLIC_CATALOGO);
+  const categorias = useJsonResource<CategoryResponse[]>(PUBLIC_CATEGORIAS);
 
   const [brochure, setBrochure] = useState<BrochureStatus>("unknown");
 
@@ -71,6 +74,7 @@ export function usePublicData() {
     contact.refresh();
     sedes.refresh();
     catalogo.refresh();
+    categorias.refresh();
     setBrochure("unknown");
     fetch(PUBLIC_FOLLETO, { method: "HEAD" })
       .then((res) => setBrochure(res.ok ? "available" : "missing"))
@@ -82,6 +86,7 @@ export function usePublicData() {
     contact.loading ||
     sedes.loading ||
     catalogo.loading ||
+    categorias.loading ||
     brochure === "unknown";
   const error =
     institutional.error?.message ??
@@ -95,6 +100,7 @@ export function usePublicData() {
     contact: contact.data,
     sedes: sedes.data ?? [],
     catalogo: catalogo.data ?? [],
+    categorias: categorias.data ?? [],
     brochure,
     loading,
     error,

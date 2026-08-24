@@ -3,6 +3,8 @@ import { apiFetch, isApiError } from "@/lib/api";
 import type {
   ApiError,
   CatalogResponse,
+  CategoryRequest,
+  CategoryResponse,
   OfficeRequest,
   OfficeResponse,
   ProductRequest,
@@ -136,6 +138,57 @@ export function useContentMutations() {
     }
   }, []);
 
+  const createCategory = useCallback(async (body: CategoryRequest) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch<CategoryResponse>(
+        "/api/admin/contenido-publico/categorias",
+        { method: "POST", body },
+      );
+      return res;
+    } catch (e) {
+      if (isApiError(e)) setError(e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateCategory = useCallback(async (id: string, body: CategoryRequest) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch<CategoryResponse>(
+        `/api/admin/contenido-publico/categorias/${id}`,
+        { method: "PUT", body },
+      );
+      return res;
+    } catch (e) {
+      if (isApiError(e)) setError(e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const deleteCategory = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch<{ message: string }>(
+        `/api/admin/contenido-publico/categorias/${id}`,
+        { method: "DELETE" },
+      );
+      return res;
+    } catch (e) {
+      if (isApiError(e)) setError(e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const uploadProductImage = useCallback(async (id: string, file: File) => {
     setLoading(true);
     setError(null);
@@ -252,6 +305,9 @@ export function useContentMutations() {
     deleteProduct,
     uploadProductImage,
     deleteProductImage,
+    createCategory,
+    updateCategory,
+    deleteCategory,
     uploadBrochure,
     deleteBrochure,
     loading,

@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Tabs, type TabItem } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { Badge } from "@/components/ui/Badge";
 import { DataTable, type Column } from "@/components/common/DataTable";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -10,6 +11,7 @@ import { InstitutionalForm } from "@/components/admin/content/InstitutionalForm"
 import { ContactForm } from "@/components/admin/content/ContactForm";
 import { OfficeFormModal } from "@/components/admin/content/OfficeFormModal";
 import { ProductFormModal } from "@/components/admin/content/ProductFormModal";
+import { CategoryFormModal } from "@/components/admin/content/CategoryFormModal";
 import { BrochureManager } from "@/components/admin/content/BrochureManager";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/EmptyState";
@@ -18,18 +20,21 @@ import { useContentMutations } from "@/hooks/useContentMutations";
 import { toast } from "sonner";
 import type {
   CatalogResponse,
+  CategoryRequest,
+  CategoryResponse,
   OfficeRequest,
   OfficeResponse,
   ProductRequest,
 } from "@/types";
 
-type TabId = "institucional" | "contacto" | "sedes" | "catalogo" | "folleto";
+type TabId = "institucional" | "contacto" | "sedes" | "catalogo" | "categorias" | "folleto";
 
 const TABS: TabItem[] = [
   { id: "institucional", label: "Institucional" },
   { id: "contacto", label: "Contacto" },
   { id: "sedes", label: "Sedes" },
   { id: "catalogo", label: "Catálogo" },
+  { id: "categorias", label: "Categorías" },
   { id: "folleto", label: "Folleto" },
 ];
 
@@ -93,6 +98,16 @@ export function PublicContentView() {
       {active === "catalogo" ? (
         <ProductsPanel
           products={publicData.catalogo}
+          categories={publicData.categorias}
+          loading={publicData.loading}
+          error={publicData.error}
+          onRefresh={refreshAll}
+        />
+      ) : null}
+
+      {active === "categorias" ? (
+        <CategoriesPanel
+          categories={publicData.categorias}
           loading={publicData.loading}
           error={publicData.error}
           onRefresh={refreshAll}
@@ -279,11 +294,13 @@ function OfficesPanel({
 
 function ProductsPanel({
   products,
+  categories,
   loading,
   error,
   onRefresh,
 }: {
   products: CatalogResponse[];
+  categories: CategoryResponse[];
   loading: boolean;
   error: string | null;
   onRefresh: () => void;
@@ -373,6 +390,16 @@ function ProductsPanel({
     },
     { key: "presentation", header: "Presentación", render: (p) => p.presentation || "—" },
     {
+      key: "category",
+      header: "Categoría",
+      render: (p) =>
+        p.categoryName ? (
+          <Badge tone="active">{p.categoryName}</Badge>
+        ) : (
+          <span className="text-on-surface-variant">—</span>
+        ),
+    },
+    {
       key: "area",
       header: "Área",
       render: (p) => p.productionArea || "—",
@@ -436,6 +463,7 @@ function ProductsPanel({
         }}
         onSubmit={handleSubmit}
         initial={editing}
+        categories={categories}
         loading={mutations.loading}
         errorMessage={mutations.error?.message}
         removingImage={removingImage}
@@ -447,6 +475,145 @@ function ProductsPanel({
         message={
           deleting
             ? `¿Seguro que deseas eliminar el producto "${deleting.name}"?`
+            : ""
+        }
+        confirmLabel="Eliminar"
+        tone="danger"
+        loading={mutations.loading}
+        onCancel={() => setDeleting(null)}
+        onConfirm={handleDelete}
+      />
+    </section>
+  );
+}
+
+function CategoriesPanel({
+  categories,
+  loading,
+  error,
+  onRefresh,
+}: {
+  categories: CategoryResponse[];
+  loading: boolean;
+  error: string | null;
+  onRefresh: () => void;
+}) {
+  const mutations = useContentMutations();
+  const [editing, setEditing] = useState<CategoryResponse | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<CategoryResponse | null>(null);
+
+  const handleSubmit = async (values: CategoryRequest) => {
+    if (editing) {
+      const res = await mutations.updateCategory(editing.id, values);
+      if (res) {
+        toast.success("Categoría actualizada");
+        onRefresh();
+      } else {
+        toast.error(mutations.error?.message ?? "No se pudo actualizar la categoría");
+      }
+      return !!res;
+    }
+    const res = await mutations.createCategory(values);
+    if (res) {
+      toast.success("Categoría creada");
+      onRefresh();
+    } else {
+      toast.error(mutations.error?.message ?? "No se pudo crear la categoría");
+    }
+    return !!res;
+  };
+
+  const handleDelete = async () => {
+    if (!deleting) return;
+    const res = await mutations.deleteCategory(deleting.id);
+    if (res) {
+      toast.success("Categoría eliminada");
+      onRefresh();
+      setDeleting(null);
+    } else {
+      toast.error(mutations.error?.message ?? "No se pudo eliminar la categoría");
+    }
+  };
+
+  const columns: Column<CategoryResponse>[] = [
+    { key: "name", header: "Nombre", render: (c) => c.name },
+    {
+      key: "description",
+      header: "Descripción",
+      render: (c) => c.description || <span className="text-on-surface-variant">—</span>,
+    },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      render: (c) => (
+        <div className="flex justify-end gap-1">
+          <Tooltip label="Editar categoría">
+            <Button variant="ghost" size="sm" onClick={() => setEditing(c)} aria-label={`Editar ${c.name}`}>
+              <Icon name="edit" size="sm" />
+            </Button>
+          </Tooltip>
+          <Tooltip label="Eliminar categoría">
+            <Button variant="ghost" size="sm" onClick={() => setDeleting(c)} aria-label={`Eliminar ${c.name}`}>
+              <Icon name="delete" size="sm" />
+            </Button>
+          </Tooltip>
+        </div>
+      ),
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    );
+  }
+  if (error) {
+    return <ErrorState message={error} onRetry={onRefresh} />;
+  }
+
+  return (
+    <section className="card space-y-4">
+      <header className="card-header">
+        <h2 className="text-heading-md">Categorías del catálogo</h2>
+        <Button onClick={() => setCreating(true)}>
+          <Icon name="add" size="sm" /> Nueva categoría
+        </Button>
+      </header>
+      {categories.length === 0 ? (
+        <EmptyState
+          title="Sin categorías"
+          description="No hay categorías registradas. Crea la primera para agrupar productos en el landing."
+          icon="category"
+        />
+      ) : (
+        <DataTable columns={columns} data={categories} rowKey={(c) => c.id} />
+      )}
+      <p className="text-body-sm text-on-surface-variant">
+        No se puede eliminar una categoría que tenga productos asignados.
+      </p>
+      <CategoryFormModal
+        open={creating || !!editing}
+        onClose={() => {
+          setCreating(false);
+          setEditing(null);
+        }}
+        onSubmit={handleSubmit}
+        initial={editing}
+        loading={mutations.loading}
+        errorMessage={mutations.error?.message}
+      />
+      <ConfirmDialog
+        open={!!deleting}
+        title="Eliminar categoría"
+        message={
+          deleting
+            ? `¿Seguro que deseas eliminar la categoría "${deleting.name}"?`
             : ""
         }
         confirmLabel="Eliminar"

@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Modal } from "@/components/ui/Modal";
 import { Button, Spinner } from "@/components/ui/Button";
-import { FormField } from "@/components/ui/Input";
-import { Input } from "@/components/ui/Input";
+import { FormField, Input } from "@/components/ui/Input";
 import { Alert } from "@/components/ui/Alert";
 import { Icon } from "@/components/ui/Icon";
-import type { CatalogResponse, ProductRequest } from "@/types";
+import { Select, Option } from "@/components/ui/Select";
+import type { CatalogResponse, CategoryResponse, ProductRequest } from "@/types";
 
 type FormValues = {
   name: string;
@@ -14,6 +14,7 @@ type FormValues = {
   activeIngredient: string;
   presentation: string;
   productionArea: string;
+  categoryId: string;
 };
 
 export function ProductFormModal({
@@ -21,6 +22,7 @@ export function ProductFormModal({
   onClose,
   onSubmit,
   initial,
+  categories,
   loading,
   errorMessage,
   removingImage,
@@ -30,6 +32,7 @@ export function ProductFormModal({
   onClose: () => void;
   onSubmit: (values: ProductRequest, imageFile: File | null) => Promise<boolean>;
   initial?: Partial<CatalogResponse> | null;
+  categories?: CategoryResponse[];
   loading?: boolean;
   errorMessage?: string | null;
   removingImage?: boolean;
@@ -51,6 +54,7 @@ export function ProductFormModal({
       activeIngredient: initial?.activeIngredient ?? "",
       presentation: initial?.presentation ?? "",
       productionArea: initial?.productionArea ?? "",
+      categoryId: initial?.categoryId ?? "",
     },
   });
 
@@ -62,6 +66,7 @@ export function ProductFormModal({
         activeIngredient: initial?.activeIngredient ?? "",
         presentation: initial?.presentation ?? "",
         productionArea: initial?.productionArea ?? "",
+        categoryId: initial?.categoryId ?? "",
       });
       setImageFile(null);
       setPreviewUrl(null);
@@ -87,6 +92,7 @@ export function ProductFormModal({
       activeIngredient: values.activeIngredient,
       presentation: values.presentation,
       productionArea: values.productionArea,
+      categoryId: values.categoryId || null,
     };
     const ok = await onSubmit(body, imageFile);
     if (ok) {
@@ -190,6 +196,16 @@ export function ProductFormModal({
         </div>
         <FormField id="pr-area" label="Área de producción" error={errors.productionArea?.message}>
           <Input id="pr-area" {...register("productionArea")} />
+        </FormField>
+        <FormField id="pr-cat" label="Categoría">
+          <Select id="pr-cat" {...register("categoryId")}>
+            <Option value="">Sin categoría</Option>
+            {(categories ?? []).map((c) => (
+              <Option key={c.id} value={c.id}>
+                {c.name}
+              </Option>
+            ))}
+          </Select>
         </FormField>
         {errorMessage ? (
           <Alert tone="error" title="No se pudo guardar el producto">
