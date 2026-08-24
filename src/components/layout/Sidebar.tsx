@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Icon } from "@/components/ui/Icon";
-import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/cn";
 import type { Role } from "@/types";
 
@@ -14,7 +13,7 @@ type Item = {
 };
 
 const items: Item[] = [
-  { to: "/admin/dashboard", label: "Dashboard", icon: "dashboard", roles: ["ADMIN"] },
+  { to: "/admin/dashboard", label: "Panel Administración", icon: "dashboard", roles: ["ADMIN"] },
   { to: "/admin/usuarios", label: "Usuarios", icon: "group", roles: ["ADMIN"], end: true },
   { to: "/admin/matriz-roles", label: "Roles", icon: "verified_user", roles: ["ADMIN"] },
   { to: "/admin/areas", label: "Áreas", icon: "domain", roles: ["ADMIN"] },
@@ -26,31 +25,12 @@ const items: Item[] = [
   { to: "/permisos", label: "Permisos", icon: "vpn_key", roles: ["GESTOR_PERSONAL"] },
   { to: "/personal/historial", label: "Historial de Accesos", icon: "history", roles: ["ADMIN", "GESTOR_PERSONAL"] },
   { to: "/personal/socio", label: "Archivo para Socio", icon: "send", roles: ["ADMIN", "GESTOR_PERSONAL"] },
-  { to: "/supervisor", label: "Dashboard", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"], end: true },
+  { to: "/supervisor", label: "Panel Supervisión", icon: "monitoring", roles: ["SUPERVISOR_AUDITOR"], end: true },
   { to: "/supervisor/zones", label: "Zonas", icon: "location_on", roles: ["SUPERVISOR_AUDITOR"] },
   { to: "/supervisor/reportes", label: "Reportes", icon: "summarize", roles: ["ADMIN", "SUPERVISOR_AUDITOR"] },
-  { to: "/ajustes", label: "Ajustes", icon: "settings", roles: ["ADMIN", "GESTOR_PERSONAL", "SUPERVISOR_AUDITOR"] },
 ];
 
-const roleLabel: Record<Role, string> = {
-  ADMIN: "Administrador",
-  GESTOR_PERSONAL: "Gestor de Personal",
-  SUPERVISOR_AUDITOR: "Supervisor / Auditor",
-};
-
-function initialsOf(name?: string): string {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
 export function Sidebar({ role }: { role: Role | null }) {
-  const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const visible = items.filter((i) => role && i.roles.includes(role));
 
@@ -96,23 +76,6 @@ export function Sidebar({ role }: { role: Role | null }) {
             </button>
           </>
         )}
-      </div>
-
-      <div className={cn("border-b border-outline-variant py-4", collapsed ? "flex justify-center" : "px-4")}>
-        <div className={cn("flex items-center gap-3", collapsed && "flex-col")}>
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-container text-body-sm font-bold text-on-primary-container">
-            {initialsOf(user?.nombre)}
-          </span>
-          {!collapsed ? (
-            <div className="min-w-0">
-              <p className="truncate text-body-sm font-semibold text-on-surface">{user?.nombre ?? "Usuario"}</p>
-              <p className="truncate text-body-sm text-on-surface-variant">
-                {role ? roleLabel[role] : ""}
-              </p>
-              <p className="truncate text-body-sm text-on-surface-variant">{user?.email ?? ""}</p>
-            </div>
-          ) : null}
-        </div>
       </div>
 
       <nav aria-label="Navegación principal" className="flex-1 space-y-1 overflow-y-auto p-3">
