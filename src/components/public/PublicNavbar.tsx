@@ -50,11 +50,6 @@ export function PublicNavbar() {
           ))}
         </nav>
         <div className="flex items-center gap-2 md:ml-0 ml-auto">
-          <Link to="/validar" aria-label="Validar acceso">
-            <Button variant="ghost" size="sm">
-              <Icon name="qr_code_scanner" size="sm" /> Validar acceso
-            </Button>
-          </Link>
           {hydrated && isAuthed && role ? (
             <>
               <Link to={homeByRole[role]}>
