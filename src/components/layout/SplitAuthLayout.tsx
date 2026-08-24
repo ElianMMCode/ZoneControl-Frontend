@@ -22,12 +22,6 @@ export function SplitAuthLayout({ children }: { children?: ReactNode }) {
               </span>
               Laboratorio XYZ
             </Link>
-            <Link
-              to="/"
-              className="ml-auto flex items-center gap-1 text-body-sm text-public-on-surface-variant hover:text-public-on-surface"
-            >
-              <Icon name="arrow_back" size="sm" /> Volver al sitio
-            </Link>
           </header>
           <main className="flex flex-1 items-center justify-center py-10">{children ?? <Outlet />}</main>
           <footer className="text-center text-body-sm text-on-surface-variant">
