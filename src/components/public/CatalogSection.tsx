@@ -35,7 +35,7 @@ export function CatalogSection({ products }: { products: CatalogResponse[] }) {
               key={p.id}
               className="flex flex-col gap-3 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm"
             >
-              <div className="aspect-[4/3] w-full bg-surface-container">
+              <div className="h-56 w-full bg-surface-container">
                 {p.imageUrl ? (
                   <img
                     src={p.imageUrl}
